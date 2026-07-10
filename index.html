@@ -1483,6 +1483,7 @@
   var QURAN_TR_EDITION = "tr.diyanet";
   var QURAN_SURAHS_KEY = "vakt_quran_surahs";
   var QURAN_PAGE_PREFIX = "vakt_quran_page_";
+  var QURAN_SURAH_TR_PREFIX = "vakt_quran_surah_tr_";
   var QURAN_DAILY_KEY = "vakt_quran_daily";
   var QURAN_LAST_PAGE_KEY = "vakt_quran_last_page";
   var QURAN_TOTAL_PAGES = 604;
@@ -1594,6 +1595,21 @@
       });
   }
 
+  function loadSurahTranslation(surahNumber){
+    var key = QURAN_SURAH_TR_PREFIX + surahNumber;
+    try{
+      var cached = JSON.parse(localStorage.getItem(key));
+      if(cached && cached.length) return Promise.resolve(cached);
+    }catch(e){ /* yok say */ }
+
+    var base = "https://api.alquran.cloud/v1/surah/" + surahNumber;
+    return fetchQuranEdition(base, QURAN_TR_EDITION).then(function(data){
+      var ayahs = (data && data.ayahs) || [];
+      localStorage.setItem(key, JSON.stringify(ayahs));
+      return ayahs;
+    });
+  }
+
   function loadPage(pageNum){
     var key = QURAN_PAGE_PREFIX + pageNum;
     try{
@@ -1602,23 +1618,36 @@
     }catch(e){ /* yok say */ }
 
     var base = "https://api.alquran.cloud/v1/page/" + pageNum;
-    return Promise.all([
-      fetchQuranEdition(base, QURAN_AR_EDITION),
-      fetchQuranEdition(base, QURAN_TR_EDITION)
-    ]).then(function(results){
-      var arData = results[0], trData = results[1];
-      var trAyahs = (trData && trData.ayahs) || [];
-      var ayahs = ((arData && arData.ayahs) || []).map(function(a, i){
-        return {
-          n: a.numberInSurah,
-          ar: a.text,
-          tr: (trAyahs[i] ? trAyahs[i].text : ""),
-          surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
-        };
+    return fetchQuranEdition(base, QURAN_AR_EDITION).then(function(arData){
+      var arAyahs = (arData && arData.ayahs) || [];
+      var surahNumbers = [];
+      arAyahs.forEach(function(a){
+        var sn = a.surah && a.surah.number;
+        if(sn && surahNumbers.indexOf(sn) === -1) surahNumbers.push(sn);
       });
-      var result = { page: pageNum, ayahs: ayahs };
-      localStorage.setItem(key, JSON.stringify(result));
-      return result;
+
+      return Promise.all(surahNumbers.map(loadSurahTranslation)).then(function(trListPerSurah){
+        var trMap = {};
+        surahNumbers.forEach(function(sn, idx){
+          (trListPerSurah[idx] || []).forEach(function(tAyah){
+            trMap[sn + ":" + tAyah.numberInSurah] = tAyah.text;
+          });
+        });
+
+        var ayahs = arAyahs.map(function(a){
+          var sn = a.surah ? a.surah.number : null;
+          return {
+            n: a.numberInSurah,
+            ar: a.text,
+            tr: (sn != null && trMap[sn + ":" + a.numberInSurah]) || "",
+            surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
+          };
+        });
+
+        var result = { page: pageNum, ayahs: ayahs };
+        localStorage.setItem(key, JSON.stringify(result));
+        return result;
+      });
     });
   }
 
