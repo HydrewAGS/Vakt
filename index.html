@@ -214,6 +214,7 @@
 
   #calPrev, #calNext{ background: transparent; }
   #calPrev:hover, #calNext:hover{ background: var(--border); color: var(--text); }
+  #quranPrevBtn:disabled, #quranNextBtn:disabled{ opacity: .35; }
 
   .cal-prayer-row{
     display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-radius: 12px;
@@ -282,9 +283,9 @@
 
     <!-- Sekmeler -->
     <div class="flex gap-1 p-1 rounded-full mb-7 fade-in" style="background:var(--border)" role="tablist">
-      <button id="tabBtnToday" class="segmented-btn flex-1 py-2 rounded-full text-sm font-semibold transition-colors" role="tab" aria-selected="true">Bugün</button>
-      <button id="tabBtnCalendar" class="segmented-btn flex-1 py-2 rounded-full text-sm font-semibold transition-colors" role="tab" aria-selected="false">Takvim</button>
-      <button id="tabBtnQuran" class="segmented-btn flex-1 py-2 rounded-full text-sm font-semibold transition-colors" role="tab" aria-selected="false">Kur'an</button>
+      <button id="tabBtnToday" class="segmented-btn flex-1 py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors" role="tab" aria-selected="true">Bugün</button>
+      <button id="tabBtnCalendar" class="segmented-btn flex-1 py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors" role="tab" aria-selected="false">Takvim</button>
+      <button id="tabBtnQuran" class="segmented-btn flex-1 py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors" role="tab" aria-selected="false">Kur'an-ı Kerim</button>
     </div>
 
     <div id="viewToday">
@@ -599,24 +600,35 @@
       </div>
     </div>
 
-    <!-- Kur'an sekmesi -->
+    <!-- Kur'an-ı Kerim sekmesi: sayfa sayfa kitap okuyucu -->
     <div id="viewQuran" class="hidden">
-      <div id="quranListView">
-        <p class="text-sm mb-4 fade-in" style="color:var(--muted)">Okumak istediğin sureyi seç.</p>
-        <div id="quranList" class="space-y-2"></div>
+      <div class="flex items-center justify-between mb-4 fade-in">
+        <button id="quranPrevBtn" aria-label="Önceki sayfa" class="focus-ring w-10 h-10 rounded-full border flex items-center justify-center shrink-0" style="border-color:var(--border); background:var(--surface)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="text-center">
+          <p id="quranPageLabel" class="font-serif text-base font-semibold"></p>
+          <button id="quranSurahPickerBtn" type="button" class="focus-ring text-xs underline decoration-dotted mt-0.5" style="color:var(--gold)">Sureye git</button>
+        </div>
+        <button id="quranNextBtn" aria-label="Sonraki sayfa" class="focus-ring w-10 h-10 rounded-full border flex items-center justify-center shrink-0" style="border-color:var(--border); background:var(--surface)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
 
-      <div id="quranReaderView" class="hidden">
-        <div class="flex items-center gap-3 mb-5 fade-in">
-          <button id="quranBackBtn" aria-label="Sure listesine dön" class="focus-ring w-9 h-9 rounded-full border flex items-center justify-center shrink-0" style="border-color:var(--border); background:var(--surface)">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <div id="quranPageContent" class="fade-in"></div>
+    </div>
+
+    <!-- Sureye git modalı -->
+    <div id="surahPickerModal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
+      <div id="surahPickerBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.5)"></div>
+      <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border p-5 sm:p-6 card-surface max-h-[85vh] flex flex-col" style="border-color:var(--border)">
+        <div class="flex items-center justify-between mb-4 shrink-0">
+          <h2 class="font-serif text-lg font-semibold">Sureye Git</h2>
+          <button id="surahPickerClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
-          <div class="flex-1 min-w-0">
-            <p id="quranReaderTitle" class="font-serif text-lg font-semibold truncate"></p>
-            <p id="quranReaderSub" class="text-xs" style="color:var(--muted)"></p>
-          </div>
         </div>
-        <div id="quranAyahs" class="space-y-3"></div>
+        <div id="quranList" class="space-y-2 overflow-y-auto"></div>
       </div>
     </div>
 
@@ -1086,8 +1098,9 @@
       renderCalendarGrid();
       renderCalendarDetail();
     }
-    if(showQuran && !surahList){
-      renderSurahList();
+    if(showQuran && !quranInitialized){
+      quranInitialized = true;
+      renderPage(currentPage);
     }
   }
 
@@ -1465,26 +1478,33 @@
   updateLocationPill();
   fetchAndApplyPrayerTimes({ announce: false });
 
-  /* ---------- Kur'an ---------- */
+  /* ---------- Kur'an-ı Kerim: sayfa sayfa okuyucu ---------- */
   var QURAN_AR_EDITION = "quran-uthmani";
   var QURAN_TR_EDITION = "tr.diyanet";
   var QURAN_SURAHS_KEY = "vakt_quran_surahs";
-  var QURAN_SURAH_PREFIX = "vakt_quran_surah_";
+  var QURAN_PAGE_PREFIX = "vakt_quran_page_";
   var QURAN_DAILY_KEY = "vakt_quran_daily";
+  var QURAN_LAST_PAGE_KEY = "vakt_quran_last_page";
+  var QURAN_TOTAL_PAGES = 604;
 
+  var quranPageLabelEl = document.getElementById("quranPageLabel");
+  var quranPageContentEl = document.getElementById("quranPageContent");
+  var quranPrevBtn = document.getElementById("quranPrevBtn");
+  var quranNextBtn = document.getElementById("quranNextBtn");
+  var quranSurahPickerBtn = document.getElementById("quranSurahPickerBtn");
+  var surahPickerModal = document.getElementById("surahPickerModal");
+  var surahPickerBackdrop = document.getElementById("surahPickerBackdrop");
+  var surahPickerClose = document.getElementById("surahPickerClose");
   var quranListEl = document.getElementById("quranList");
-  var quranListViewEl = document.getElementById("quranListView");
-  var quranReaderViewEl = document.getElementById("quranReaderView");
-  var quranReaderTitleEl = document.getElementById("quranReaderTitle");
-  var quranReaderSubEl = document.getElementById("quranReaderSub");
-  var quranAyahsEl = document.getElementById("quranAyahs");
-  var quranBackBtn = document.getElementById("quranBackBtn");
   var dailyVerseCard = document.getElementById("dailyVerseCard");
   var dailyVerseArabicEl = document.getElementById("dailyVerseArabic");
   var dailyVerseTurkishEl = document.getElementById("dailyVerseTurkish");
   var dailyVerseRefEl = document.getElementById("dailyVerseRef");
 
   var surahList = null;
+  var quranInitialized = false;
+  var currentPage = parseInt(localStorage.getItem(QURAN_LAST_PAGE_KEY), 10);
+  if(!currentPage || currentPage < 1 || currentPage > QURAN_TOTAL_PAGES) currentPage = 1;
 
   function escapeHtml(s){
     return String(s == null ? "" : s)
@@ -1533,69 +1553,119 @@
       });
   }
 
-  function loadSurahDetail(number){
-    var key = QURAN_SURAH_PREFIX + number;
+  function openSurahPicker(){
+    surahPickerModal.classList.remove("hidden");
+    if(!surahList) renderSurahList();
+  }
+  function closeSurahPicker(){
+    surahPickerModal.classList.add("hidden");
+  }
+  quranSurahPickerBtn.addEventListener("click", openSurahPicker);
+  surahPickerClose.addEventListener("click", closeSurahPicker);
+  surahPickerBackdrop.addEventListener("click", closeSurahPicker);
+
+  quranListEl.addEventListener("click", function(e){
+    var row = e.target.closest(".quran-surah-row");
+    if(!row) return;
+    var number = parseInt(row.getAttribute("data-number"), 10);
+    closeSurahPicker();
+    goToSurah(number);
+  });
+
+  function goToSurah(number){
+    quranPageContentEl.innerHTML = '<p class="text-sm text-center py-10" style="color:var(--muted)">Yükleniyor…</p>';
+    fetch("https://api.alquran.cloud/v1/ayah/" + number + ":1/" + QURAN_AR_EDITION)
+      .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
+      .then(function(json){
+        if(!json || json.code !== 200 || !json.data || !json.data.page) throw new Error("bad response");
+        renderPage(json.data.page);
+      })
+      .catch(function(){
+        showToast("Sureye gidilemedi, tekrar dene");
+      });
+  }
+
+  function loadPage(pageNum){
+    var key = QURAN_PAGE_PREFIX + pageNum;
     try{
       var cached = JSON.parse(localStorage.getItem(key));
       if(cached && cached.ayahs && cached.ayahs.length) return Promise.resolve(cached);
     }catch(e){ /* yok say */ }
 
-    var url = "https://api.alquran.cloud/v1/surah/" + number + "/editions/" + QURAN_AR_EDITION + "," + QURAN_TR_EDITION;
+    var url = "https://api.alquran.cloud/v1/page/" + pageNum + "/editions/" + QURAN_AR_EDITION + "," + QURAN_TR_EDITION;
     return fetch(url)
       .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
       .then(function(json){
         if(!json || json.code !== 200 || !json.data || json.data.length < 2) throw new Error("bad response");
         var arEd = json.data[0], trEd = json.data[1];
         var ayahs = arEd.ayahs.map(function(a, i){
-          return { n: a.numberInSurah, ar: a.text, tr: (trEd.ayahs[i] ? trEd.ayahs[i].text : "") };
+          return {
+            n: a.numberInSurah,
+            ar: a.text,
+            tr: (trEd.ayahs[i] ? trEd.ayahs[i].text : ""),
+            surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
+          };
         });
-        var result = {
-          number: number, name: arEd.name,
-          englishName: arEd.englishName, englishNameTranslation: arEd.englishNameTranslation,
-          ayahs: ayahs
-        };
+        var result = { page: pageNum, ayahs: ayahs };
         localStorage.setItem(key, JSON.stringify(result));
         return result;
       });
   }
 
-  function openSurah(number){
-    quranListViewEl.classList.add("hidden");
-    quranReaderViewEl.classList.remove("hidden");
-    quranReaderTitleEl.textContent = "Yükleniyor…";
-    quranReaderSubEl.textContent = "";
-    quranAyahsEl.innerHTML = "";
+  function renderPageContent(pageData){
+    var html = "";
+    var lastSurah = null;
+    var arabicBuffer = "";
+    var turkishItems = [];
 
-    loadSurahDetail(number)
-      .then(function(s){
-        quranReaderTitleEl.textContent = s.englishName + (s.englishNameTranslation ? " · " + s.englishNameTranslation : "");
-        quranReaderSubEl.textContent = s.ayahs.length + " ayet";
-        var html = "";
-        s.ayahs.forEach(function(a){
-          html += '<div class="rounded-2xl border p-4 card-surface" style="border-color:var(--border)">'
-            + '<span class="inline-flex w-6 h-6 rounded-full border items-center justify-center text-[11px] font-semibold mb-3" style="border-color:var(--gold); color:var(--gold)">' + a.n + '</span>'
-            + '<p dir="rtl" lang="ar" class="font-display text-xl leading-loose mb-2" style="color:var(--text)">' + escapeHtml(a.ar) + '</p>'
-            + '<p class="text-sm leading-relaxed" style="color:var(--muted)">' + escapeHtml(a.tr) + '</p>'
-            + '</div>';
-        });
-        quranAyahsEl.innerHTML = html;
+    function flushSection(){
+      if(!arabicBuffer) return;
+      html += '<div class="rounded-2xl border p-4 card-surface mb-3" style="border-color:var(--border)">'
+        + '<p dir="rtl" lang="ar" class="font-display text-xl leading-loose text-right mb-4" style="color:var(--text)">' + arabicBuffer + '</p>'
+        + '<div class="space-y-2 pt-3" style="border-top:1px solid var(--border)">'
+        + turkishItems.join("")
+        + '</div>'
+        + '</div>';
+      arabicBuffer = "";
+      turkishItems = [];
+    }
+
+    pageData.ayahs.forEach(function(a){
+      if(a.surahName !== lastSurah){
+        flushSection();
+        html += '<p class="text-center font-serif text-sm font-semibold mb-3 mt-1" style="color:var(--gold)">' + escapeHtml(a.surahName) + '</p>';
+        lastSurah = a.surahName;
+      }
+      arabicBuffer += escapeHtml(a.ar) + ' <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] align-middle" style="border:1px solid var(--gold); color:var(--gold)">' + a.n + '</span> ';
+      turkishItems.push('<p class="text-sm leading-relaxed"><span class="font-semibold" style="color:var(--gold)">' + a.n + '.</span> <span style="color:var(--muted)">' + escapeHtml(a.tr) + '</span></p>');
+    });
+    flushSection();
+
+    quranPageContentEl.innerHTML = html || '<p class="text-sm text-center py-10" style="color:var(--muted)">İçerik bulunamadı.</p>';
+  }
+
+  function renderPage(pageNum){
+    pageNum = Math.max(1, Math.min(QURAN_TOTAL_PAGES, pageNum));
+    currentPage = pageNum;
+    localStorage.setItem(QURAN_LAST_PAGE_KEY, String(pageNum));
+    quranPageLabelEl.textContent = "Sayfa " + pageNum + " / " + QURAN_TOTAL_PAGES;
+    quranPrevBtn.disabled = pageNum <= 1;
+    quranNextBtn.disabled = pageNum >= QURAN_TOTAL_PAGES;
+    quranPageContentEl.innerHTML = '<p class="text-sm text-center py-10" style="color:var(--muted)">Yükleniyor…</p>';
+
+    loadPage(pageNum)
+      .then(function(data){
+        if(currentPage !== pageNum) return;
+        renderPageContent(data);
       })
       .catch(function(){
-        quranReaderTitleEl.textContent = "Alınamadı";
-        quranAyahsEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">Bu sure yüklenemedi. İnternetini kontrol edip tekrar dene.</p>';
+        if(currentPage !== pageNum) return;
+        quranPageContentEl.innerHTML = '<p class="text-sm text-center py-10" style="color:var(--muted)">Bu sayfa yüklenemedi. İnternetini kontrol edip tekrar dene.</p>';
       });
   }
 
-  quranListEl.addEventListener("click", function(e){
-    var row = e.target.closest(".quran-surah-row");
-    if(!row) return;
-    openSurah(parseInt(row.getAttribute("data-number"), 10));
-  });
-
-  quranBackBtn.addEventListener("click", function(){
-    quranReaderViewEl.classList.add("hidden");
-    quranListViewEl.classList.remove("hidden");
-  });
+  quranPrevBtn.addEventListener("click", function(){ renderPage(currentPage - 1); });
+  quranNextBtn.addEventListener("click", function(){ renderPage(currentPage + 1); });
 
   /* ---------- Günün Ayeti ---------- */
   function dailyAyahNumberFor(dateStr){
@@ -1610,7 +1680,7 @@
     dailyVerseArabicEl.textContent = v.arabic;
     dailyVerseTurkishEl.textContent = v.turkish;
     dailyVerseRefEl.textContent = v.surahName + " Suresi, " + v.numberInSurah + ". Ayet";
-    dailyVerseCard.setAttribute("data-surah", v.surahNumber);
+    if(v.page) dailyVerseCard.setAttribute("data-page", v.page);
   }
 
   function loadDailyVerse(){
@@ -1632,9 +1702,9 @@
           date: state.date,
           arabic: ar.text,
           turkish: tr.text,
-          surahNumber: ar.surah.number,
           surahName: ar.surah.englishName,
-          numberInSurah: ar.numberInSurah
+          numberInSurah: ar.numberInSurah,
+          page: ar.page
         };
         localStorage.setItem(QURAN_DAILY_KEY, JSON.stringify(payload));
         renderDailyVerse(payload);
@@ -1647,11 +1717,9 @@
   }
 
   dailyVerseCard.addEventListener("click", function(){
-    var num = parseInt(dailyVerseCard.getAttribute("data-surah"), 10);
-    if(!num) return;
+    var page = parseInt(dailyVerseCard.getAttribute("data-page"), 10);
     setActiveTab("quran");
-    if(!surahList) renderSurahList();
-    openSurah(num);
+    if(page) renderPage(page);
   });
 
   loadDailyVerse();
