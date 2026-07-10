@@ -472,6 +472,14 @@
       </svg>
     </div>
 
+    <!-- Aktif vaktin geri sayımı -->
+    <div id="activePrayerCountdown" class="hidden justify-center mb-6 fade-in">
+      <div class="inline-flex items-center gap-2 rounded-full border px-4 py-2" style="border-color:var(--gold); background:var(--gold-soft)">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <span class="text-sm font-semibold" style="color:var(--gold)"><span id="activePrayerLabel"></span> vaktinin bitmesine <span id="activePrayerRemain"></span></span>
+      </div>
+    </div>
+
     <!-- Gelişim: seviye rozeti + XP çubuğu -->
     <div class="mb-7 fade-in flex items-center gap-3" style="animation-delay:.08s">
       <div id="levelBadge" class="w-12 h-12 rounded-full border-2 flex items-center justify-center shrink-0" style="border-color:var(--gold); background:var(--gold-soft)">
@@ -1557,6 +1565,9 @@
   }
 
   var currentPrayerTimes = null;
+  var activePrayerCountdownEl = document.getElementById("activePrayerCountdown");
+  var activePrayerLabelEl = document.getElementById("activePrayerLabel");
+  var activePrayerRemainEl = document.getElementById("activePrayerRemain");
 
   function parseTimeOn(hhmm, dayOffset){
     var parts = (hhmm || "").split(":");
@@ -1606,14 +1617,19 @@
         subEl.textContent = PRAYER_META[key].sub;
         return;
       }
-      var baseText = PRAYER_META[key].sub + " · " + t[key] + (key === "imsak" && t.sunrise ? " – " + t.sunrise : "");
-      if(key === activeKey){
-        var remain = bounds[key].end.getTime() - now.getTime();
-        subEl.textContent = baseText + " · Bitmesine " + formatRemaining(remain);
-      } else {
-        subEl.textContent = baseText;
-      }
+      subEl.textContent = PRAYER_META[key].sub + " · " + t[key] + (key === "imsak" && t.sunrise ? " – " + t.sunrise : "");
     });
+
+    if(activeKey && activePrayerCountdownEl){
+      var remain = bounds[activeKey].end.getTime() - now.getTime();
+      activePrayerLabelEl.textContent = PRAYER_META[activeKey].label;
+      activePrayerRemainEl.textContent = formatRemaining(remain);
+      activePrayerCountdownEl.classList.remove("hidden");
+      activePrayerCountdownEl.classList.add("flex");
+    } else if(activePrayerCountdownEl){
+      activePrayerCountdownEl.classList.add("hidden");
+      activePrayerCountdownEl.classList.remove("flex");
+    }
   }
 
   function applyPrayerTimesToCards(times){
@@ -1627,6 +1643,10 @@
       var subEl = document.querySelector('.prayer-btn[data-key="' + key + '"] .prayer-sub');
       if(subEl) subEl.textContent = PRAYER_META[key].sub;
     });
+    if(activePrayerCountdownEl){
+      activePrayerCountdownEl.classList.add("hidden");
+      activePrayerCountdownEl.classList.remove("flex");
+    }
   }
 
   setInterval(updateActivePrayerCountdown, 30000);
