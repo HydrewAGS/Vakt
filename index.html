@@ -189,9 +189,31 @@
     100%{ transform: scale(2.6); opacity: 0; }
   }
 
+  .card-pop{ animation: cardPop .38s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes cardPop{
+    0%{ transform: scale(1); }
+    35%{ transform: scale(.96); }
+    70%{ transform: scale(1.025); }
+    100%{ transform: scale(1); }
+  }
+
+  .xp-float{
+    position: fixed; pointer-events: none; z-index: 70;
+    font-weight: 800; font-size: 14px; color: var(--gold);
+    text-shadow: 0 1px 3px rgba(0,0,0,.25);
+    animation: xpFloat .9s ease-out forwards;
+  }
+  @keyframes xpFloat{
+    0%{ opacity: 0; transform: translateY(0) scale(.8); }
+    18%{ opacity: 1; transform: translateY(-6px) scale(1.08); }
+    100%{ opacity: 0; transform: translateY(-46px) scale(1); }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .breathe, .cloud-1, .cloud-2, .bird-1, .bird-2, .dome-shimmer{ animation: none; opacity: 0; }
     .node-ripple{ display: none; }
+    .card-pop{ animation: none; }
+    .xp-float{ display: none; }
   }
 
   /* ---- tabs & calendar ---- */
@@ -570,6 +592,18 @@
     <!-- Takvim sekmesi -->
     <div id="viewCalendar" class="hidden">
       <div class="rounded-[1.5rem] border card-surface p-4 sm:p-5 mb-4 fade-in" style="border-color:var(--border)">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-serif text-base font-semibold">İstatistikler</p>
+          <div class="flex gap-1 p-1 rounded-full" style="background:var(--border)">
+            <button id="statsRange7" type="button" class="segmented-btn px-3 py-1 rounded-full text-xs font-semibold transition-colors" aria-selected="true">7 Gün</button>
+            <button id="statsRange30" type="button" class="segmented-btn px-3 py-1 rounded-full text-xs font-semibold transition-colors" aria-selected="false">30 Gün</button>
+          </div>
+        </div>
+        <p id="statsSummary" class="text-sm mb-3" style="color:var(--muted)"></p>
+        <svg id="statsChart" viewBox="0 0 400 140" class="w-full h-auto" aria-hidden="true"></svg>
+      </div>
+
+      <div class="rounded-[1.5rem] border card-surface p-4 sm:p-5 mb-4 fade-in" style="border-color:var(--border)">
         <div class="flex items-center justify-between mb-4">
           <button id="calPrev" aria-label="Önceki ay" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors" style="color:var(--muted)">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -669,7 +703,19 @@
       <p id="locationStatus" class="text-xs mb-4 min-h-[1em]" style="color:var(--muted)"></p>
 
       <button id="saveLocationBtn" class="w-full rounded-xl py-2.5 text-sm font-semibold" style="background:var(--gold); color:var(--silhouette)">Kaydet</button>
-      <p class="text-center text-[11px] mt-4" style="color:var(--muted)">Vakitler <a href="https://aladhan.com" target="_blank" rel="noopener" class="underline">Aladhan API</a>, ülke/şehir listesi <a href="https://countriesnow.space" target="_blank" rel="noopener" class="underline">CountriesNow API</a> üzerinden alınır.</p>
+
+      <label class="block text-xs font-semibold mb-2 mt-6 tracking-wide" style="color:var(--muted)">BİLDİRİMLER</label>
+      <button id="notifToggleBtn" type="button" class="focus-ring w-full flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left" style="border-color:var(--border); background:var(--bg)">
+        <span id="notifToggleDot" class="w-3 h-3 rounded-full shrink-0" style="background:var(--border)"></span>
+        <span class="flex-1">
+          <span id="notifToggleLabel" class="block text-sm font-semibold">Bildirimleri Aç</span>
+          <span class="block text-xs mt-0.5" style="color:var(--muted)">Vakit girdiğinde bildirim gönderir</span>
+        </span>
+      </button>
+      <p id="notifStatus" class="text-xs mt-2 min-h-[1em]" style="color:var(--muted)"></p>
+      <p class="text-[11px] mt-1" style="color:var(--muted)">Not: bildirimler yalnızca Vakt açıkken (arka planda bile olsa) çalışır; tarayıcı tamamen kapalıyken gelmez.</p>
+
+      <p class="text-center text-[11px] mt-5" style="color:var(--muted)">Vakitler <a href="https://aladhan.com" target="_blank" rel="noopener" class="underline">Aladhan API</a>, ülke/şehir listesi <a href="https://countriesnow.space" target="_blank" rel="noopener" class="underline">CountriesNow API</a> üzerinden alınır.</p>
     </div>
   </div>
 
@@ -869,6 +915,26 @@
     setTimeout(function(){ ripple.remove(); }, 750);
   }
 
+  function triggerCardPop(el){
+    if(reducedMotion || !el) return;
+    el.classList.remove("card-pop");
+    void el.offsetWidth;
+    el.classList.add("card-pop");
+    setTimeout(function(){ el.classList.remove("card-pop"); }, 400);
+  }
+
+  function spawnXpFloat(amount, el){
+    if(reducedMotion || !el || amount <= 0) return;
+    var rect = el.getBoundingClientRect();
+    var span = document.createElement("div");
+    span.className = "xp-float";
+    span.textContent = "+" + amount + " XP";
+    span.style.left = (rect.right - 56) + "px";
+    span.style.top = (rect.top + rect.height / 2 - 10) + "px";
+    document.body.appendChild(span);
+    setTimeout(function(){ span.remove(); }, 900);
+  }
+
   /* ---------- Date helpers ---------- */
   function todayStr(d){
     d = d || new Date();
@@ -1024,9 +1090,10 @@
     });
   }
 
-  function togglePrayerToday(key){
+  function togglePrayerToday(key, btnEl){
     var wasAllDone = completedCount() === PRAYER_KEYS.length;
     var prevLevel = levelInfo(state.xp || 0).level;
+    var xpBefore = state.xp || 0;
 
     state.prayers[key] = !state.prayers[key];
     state.xp = (state.xp || 0) + (state.prayers[key] ? XP_PER_PRAYER : -XP_PER_PRAYER);
@@ -1038,6 +1105,7 @@
       state.xp -= DAY_BONUS;
     }
     if(state.xp < 0) state.xp = 0;
+    var xpGained = state.xp - xpBefore;
 
     if(!state.history) state.history = {};
     state.history[state.date] = Object.assign({}, state.prayers);
@@ -1046,9 +1114,13 @@
     render();
     renderCalendarGrid();
     if(calSelectedDate === state.date) renderCalendarDetail();
+    renderStatsChart();
+
+    if(btnEl) triggerCardPop(btnEl);
 
     if(state.prayers[key]){
       spawnRipple(document.querySelector('.arc-node[data-node="' + key + '"]'));
+      if(btnEl && xpGained > 0) spawnXpFloat(xpGained, btnEl);
     }
 
     var newLevel = levelInfo(state.xp).level;
@@ -1059,7 +1131,7 @@
 
   buttons.forEach(function(btn){
     btn.addEventListener("click", function(){
-      togglePrayerToday(btn.getAttribute("data-key"));
+      togglePrayerToday(btn.getAttribute("data-key"), btn);
     });
   });
 
@@ -1073,6 +1145,8 @@
       render();
       renderCalendarGrid();
       renderCalendarDetail();
+      renderStatsChart();
+      fetchAndApplyPrayerTimes({ announce: false });
     }
   }, 30000);
 
@@ -1097,6 +1171,7 @@
     if(showCalendar){
       renderCalendarGrid();
       renderCalendarDetail();
+      renderStatsChart();
     }
     if(showQuran && !quranInitialized){
       quranInitialized = true;
@@ -1134,6 +1209,81 @@
     if(!rec) return 0;
     return PRAYER_KEYS.reduce(function(sum, k){ return sum + (rec[k] ? 1 : 0); }, 0);
   }
+
+  /* ---------- İstatistikler ---------- */
+  var statsRange7Btn = document.getElementById("statsRange7");
+  var statsRange30Btn = document.getElementById("statsRange30");
+  var statsSummaryEl = document.getElementById("statsSummary");
+  var statsChartEl = document.getElementById("statsChart");
+  var statsRange = 7;
+  var WEEKDAY_LABELS = ["Pt","Sa","Ça","Pe","Cu","Ct","Pz"];
+
+  function computeStatsData(days){
+    var today = new Date(state.date + "T00:00:00");
+    var out = [];
+    for(var i = days - 1; i >= 0; i--){
+      var d = new Date(today.getTime());
+      d.setDate(d.getDate() - i);
+      var ds = dateStrOf(d.getFullYear(), d.getMonth(), d.getDate());
+      out.push({ date: ds, count: dayCompletedCount(ds), dayObj: d });
+    }
+    return out;
+  }
+
+  function renderStatsChart(){
+    if(!statsChartEl) return;
+    var data = computeStatsData(statsRange);
+    var total = data.reduce(function(sum, d){ return sum + d.count; }, 0);
+    var possible = data.length * PRAYER_KEYS.length;
+    var pct = possible ? Math.round((total / possible) * 100) : 0;
+    statsSummaryEl.textContent = "Son " + statsRange + " günde " + total + "/" + possible + " vakit · %" + pct;
+
+    var svgW = 400, svgH = 140, padTop = 10, padBottom = 22;
+    var barAreaH = svgH - padTop - padBottom;
+    var gap = statsRange === 7 ? 8 : 2;
+    var barW = (svgW - gap * (data.length - 1)) / data.length;
+
+    var svg = "";
+    data.forEach(function(d, i){
+      var x = i * (barW + gap);
+      var h = Math.max((d.count / PRAYER_KEYS.length) * barAreaH, d.count > 0 ? 4 : 2);
+      var y = padTop + (barAreaH - h);
+      var color = d.count === PRAYER_KEYS.length ? "var(--green)" : (d.count > 0 ? "var(--gold)" : "var(--border)");
+      var rx = Math.min(3, barW / 2);
+      var isToday = d.date === state.date;
+      svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + Math.max(barW, 1).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="' + rx.toFixed(1) + '" fill="' + color + '"' + (isToday ? ' stroke="var(--gold)" stroke-width="1"' : '') + '/>';
+    });
+
+    if(statsRange === 7){
+      data.forEach(function(d, i){
+        var x = i * (barW + gap) + barW / 2;
+        var label = WEEKDAY_LABELS[(d.dayObj.getDay() + 6) % 7];
+        svg += '<text x="' + x.toFixed(1) + '" y="' + (svgH - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + label + '</text>';
+      });
+    } else {
+      [0, Math.floor((data.length - 1) / 2), data.length - 1].forEach(function(idx){
+        var d = data[idx];
+        var x = idx * (barW + gap) + barW / 2;
+        var label = d.dayObj.getDate() + "/" + (d.dayObj.getMonth() + 1);
+        svg += '<text x="' + x.toFixed(1) + '" y="' + (svgH - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + label + '</text>';
+      });
+    }
+
+    statsChartEl.innerHTML = svg;
+  }
+
+  statsRange7Btn.addEventListener("click", function(){
+    statsRange = 7;
+    statsRange7Btn.setAttribute("aria-selected", "true");
+    statsRange30Btn.setAttribute("aria-selected", "false");
+    renderStatsChart();
+  });
+  statsRange30Btn.addEventListener("click", function(){
+    statsRange = 30;
+    statsRange30Btn.setAttribute("aria-selected", "true");
+    statsRange7Btn.setAttribute("aria-selected", "false");
+    renderStatsChart();
+  });
 
   function renderCalendarGrid(){
     if(!calGridEl) return;
@@ -1208,6 +1358,7 @@
     saveState(state);
     renderCalendarGrid();
     renderCalendarDetail();
+    renderStatsChart();
   }
 
   calGridEl.addEventListener("click", function(e){
@@ -1221,7 +1372,7 @@
     if(!row) return;
     var key = row.getAttribute("data-key");
     if(calSelectedDate === state.date){
-      togglePrayerToday(key);
+      togglePrayerToday(key, row);
     } else {
       togglePastPrayer(calSelectedDate, key);
     }
@@ -1238,6 +1389,7 @@
 
   renderCalendarGrid();
   renderCalendarDetail();
+  renderStatsChart();
 
   /* ---------- Konum & namaz vakitleri (Aladhan API) ---------- */
   var LOCATION_KEY = "vakt_location";
@@ -1404,24 +1556,194 @@
     localStorage.setItem(TIMES_CACHE_KEY, JSON.stringify({ date: state.date, city: loc.city, country: loc.country, times: times }));
   }
 
-  function applyPrayerTimesToCards(times){
+  var currentPrayerTimes = null;
+
+  function parseTimeOn(hhmm, dayOffset){
+    var parts = (hhmm || "").split(":");
+    if(parts.length < 2) return null;
+    var d = new Date();
+    d.setDate(d.getDate() + (dayOffset || 0));
+    d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+    return d;
+  }
+
+  function formatRemaining(ms){
+    var totalMin = Math.max(0, Math.round(ms / 60000));
+    var h = Math.floor(totalMin / 60);
+    var m = totalMin % 60;
+    if(h > 0) return h + " sa " + m + " dk";
+    return m + " dk";
+  }
+
+  function updateActivePrayerCountdown(){
+    var t = currentPrayerTimes;
+    var hasAll = t && PRAYER_KEYS.every(function(k){ return !!t[k]; });
+
+    var bounds = null;
+    if(hasAll){
+      bounds = {
+        imsak: { start: parseTimeOn(t.imsak, 0), end: t.sunrise ? parseTimeOn(t.sunrise, 0) : parseTimeOn(t.ogle, 0) },
+        ogle: { start: parseTimeOn(t.ogle, 0), end: parseTimeOn(t.ikindi, 0) },
+        ikindi: { start: parseTimeOn(t.ikindi, 0), end: parseTimeOn(t.aksam, 0) },
+        aksam: { start: parseTimeOn(t.aksam, 0), end: parseTimeOn(t.yatsi, 0) },
+        yatsi: { start: parseTimeOn(t.yatsi, 0), end: parseTimeOn(t.imsak, 1) }
+      };
+    }
+
+    var now = new Date();
+    var activeKey = null;
+    if(bounds){
+      PRAYER_KEYS.forEach(function(key){
+        var b = bounds[key];
+        if(b.start && b.end && now >= b.start && now < b.end) activeKey = key;
+      });
+    }
+
     PRAYER_KEYS.forEach(function(key){
       var subEl = document.querySelector('.prayer-btn[data-key="' + key + '"] .prayer-sub');
-      if(!subEl || !times || !times[key]) return;
-      if(key === "imsak" && times.sunrise){
-        subEl.textContent = PRAYER_META[key].sub + " · " + times[key] + " – " + times.sunrise;
+      if(!subEl) return;
+      if(!hasAll || !t[key]){
+        subEl.textContent = PRAYER_META[key].sub;
+        return;
+      }
+      var baseText = PRAYER_META[key].sub + " · " + t[key] + (key === "imsak" && t.sunrise ? " – " + t.sunrise : "");
+      if(key === activeKey){
+        var remain = bounds[key].end.getTime() - now.getTime();
+        subEl.textContent = baseText + " · Bitmesine " + formatRemaining(remain);
       } else {
-        subEl.textContent = PRAYER_META[key].sub + " · " + times[key];
+        subEl.textContent = baseText;
       }
     });
   }
 
+  function applyPrayerTimesToCards(times){
+    currentPrayerTimes = times;
+    updateActivePrayerCountdown();
+  }
+
   function resetPrayerTimeLabels(){
+    currentPrayerTimes = null;
     PRAYER_KEYS.forEach(function(key){
       var subEl = document.querySelector('.prayer-btn[data-key="' + key + '"] .prayer-sub');
       if(subEl) subEl.textContent = PRAYER_META[key].sub;
     });
   }
+
+  setInterval(updateActivePrayerCountdown, 30000);
+
+  /* ---------- Bildirimler ---------- */
+  var NOTIF_ENABLED_KEY = "vakt_notifications_enabled";
+  var notifSupported = ("Notification" in window);
+  var notifToggleBtn = document.getElementById("notifToggleBtn");
+  var notifToggleDot = document.getElementById("notifToggleDot");
+  var notifToggleLabel = document.getElementById("notifToggleLabel");
+  var notifStatusEl = document.getElementById("notifStatus");
+  var reminderTimeouts = [];
+
+  function notificationsWanted(){
+    return localStorage.getItem(NOTIF_ENABLED_KEY) === "1";
+  }
+
+  function updateNotifUI(){
+    if(!notifSupported){
+      notifToggleDot.style.background = "var(--border)";
+      notifToggleLabel.textContent = "Bu tarayıcı bildirimleri desteklemiyor";
+      notifStatusEl.textContent = "iOS'ta önce uygulamayı ana ekrana eklemen gerekebilir.";
+      return;
+    }
+    if(Notification.permission === "denied"){
+      notifToggleDot.style.background = "var(--green)";
+      notifToggleDot.style.opacity = ".4";
+      notifToggleLabel.textContent = "Bildirimler engellendi";
+      notifStatusEl.textContent = "Tarayıcı ayarlarından Vakt için bildirim izni vermen gerekiyor.";
+      return;
+    }
+    if(notificationsWanted() && Notification.permission === "granted"){
+      notifToggleDot.style.background = "var(--green)";
+      notifToggleDot.style.opacity = "1";
+      notifToggleLabel.textContent = "Bildirimler açık";
+      notifStatusEl.textContent = "";
+    } else {
+      notifToggleDot.style.background = "var(--border)";
+      notifToggleDot.style.opacity = "1";
+      notifToggleLabel.textContent = "Bildirimleri Aç";
+      notifStatusEl.textContent = "";
+    }
+  }
+
+  function showPrayerNotification(key){
+    var title = PRAYER_META[key].label + " vakti girdi";
+    var body = "Vakt'e dönüp işaretlemeyi unutma.";
+    var opts = { body: body, tag: "vakt-" + key + "-" + state.date };
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.getRegistration().then(function(reg){
+        if(reg && reg.showNotification){
+          reg.showNotification(title, opts);
+        } else {
+          try{ new Notification(title, opts); }catch(e){ /* yok say */ }
+        }
+      });
+    } else {
+      try{ new Notification(title, opts); }catch(e){ /* yok say */ }
+    }
+  }
+
+  function clearReminders(){
+    reminderTimeouts.forEach(function(id){ clearTimeout(id); });
+    reminderTimeouts = [];
+  }
+
+  function scheduleReminders(){
+    clearReminders();
+    if(!notifSupported || !notificationsWanted() || Notification.permission !== "granted") return;
+
+    var cache = loadTimesCache();
+    var loc = loadLocation();
+    if(!cache || !loc || cache.date !== state.date || cache.city !== loc.city || cache.country !== loc.country) return;
+
+    var now = new Date();
+    PRAYER_KEYS.forEach(function(key){
+      var timeStr = cache.times[key];
+      if(!timeStr) return;
+      var parts = timeStr.split(":");
+      if(parts.length < 2) return;
+      var target = new Date();
+      target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      var ms = target.getTime() - now.getTime();
+      if(ms > 1000){
+        reminderTimeouts.push(setTimeout(function(){ showPrayerNotification(key); }, ms));
+      }
+    });
+  }
+
+  notifToggleBtn.addEventListener("click", function(){
+    if(!notifSupported) return;
+
+    if(notificationsWanted() && Notification.permission === "granted"){
+      localStorage.setItem(NOTIF_ENABLED_KEY, "0");
+      clearReminders();
+      updateNotifUI();
+      return;
+    }
+
+    if(Notification.permission === "denied"){
+      updateNotifUI();
+      return;
+    }
+
+    Notification.requestPermission().then(function(perm){
+      if(perm === "granted"){
+        localStorage.setItem(NOTIF_ENABLED_KEY, "1");
+        scheduleReminders();
+        showToast("Bildirimler açıldı \u2713");
+      } else {
+        localStorage.setItem(NOTIF_ENABLED_KEY, "0");
+      }
+      updateNotifUI();
+    });
+  });
+
+  updateNotifUI();
 
   function fetchAndApplyPrayerTimes(opts){
     opts = opts || {};
@@ -1434,6 +1756,7 @@
     var cache = loadTimesCache();
     if(cache && cache.date === state.date && cache.city === loc.city && cache.country === loc.country){
       applyPrayerTimesToCards(cache.times);
+      scheduleReminders();
       if(opts.announce) showToast(loc.city + " için vakitler güncel \u2713");
       return;
     }
@@ -1454,6 +1777,7 @@
         var times = { imsak: t.Imsak, ogle: t.Dhuhr, ikindi: t.Asr, aksam: t.Maghrib, yatsi: t.Isha, sunrise: t.Sunrise };
         saveTimesCache(loc, times);
         applyPrayerTimesToCards(times);
+        scheduleReminders();
         if(opts.announce) showToast(loc.city + " için vakitler güncellendi \u2713");
       })
       .catch(function(){
