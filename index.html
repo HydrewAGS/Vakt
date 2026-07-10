@@ -1511,6 +1511,15 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
+  function fetchQuranEdition(resourceBaseUrl, edition){
+    return fetch(resourceBaseUrl + "/" + edition)
+      .then(function(res){ if(!res.ok) throw new Error("network " + res.status); return res.json(); })
+      .then(function(json){
+        if(!json || json.code !== 200 || !json.data) throw new Error("bad response");
+        return json.data;
+      });
+  }
+
   function loadSurahList(){
     if(surahList) return Promise.resolve(surahList);
     try{
@@ -1592,24 +1601,25 @@
       if(cached && cached.ayahs && cached.ayahs.length) return Promise.resolve(cached);
     }catch(e){ /* yok say */ }
 
-    var url = "https://api.alquran.cloud/v1/page/" + pageNum + "/editions/" + QURAN_AR_EDITION + "," + QURAN_TR_EDITION;
-    return fetch(url)
-      .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
-      .then(function(json){
-        if(!json || json.code !== 200 || !json.data || json.data.length < 2) throw new Error("bad response");
-        var arEd = json.data[0], trEd = json.data[1];
-        var ayahs = arEd.ayahs.map(function(a, i){
-          return {
-            n: a.numberInSurah,
-            ar: a.text,
-            tr: (trEd.ayahs[i] ? trEd.ayahs[i].text : ""),
-            surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
-          };
-        });
-        var result = { page: pageNum, ayahs: ayahs };
-        localStorage.setItem(key, JSON.stringify(result));
-        return result;
+    var base = "https://api.alquran.cloud/v1/page/" + pageNum;
+    return Promise.all([
+      fetchQuranEdition(base, QURAN_AR_EDITION),
+      fetchQuranEdition(base, QURAN_TR_EDITION)
+    ]).then(function(results){
+      var arData = results[0], trData = results[1];
+      var trAyahs = (trData && trData.ayahs) || [];
+      var ayahs = ((arData && arData.ayahs) || []).map(function(a, i){
+        return {
+          n: a.numberInSurah,
+          ar: a.text,
+          tr: (trAyahs[i] ? trAyahs[i].text : ""),
+          surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
+        };
       });
+      var result = { page: pageNum, ayahs: ayahs };
+      localStorage.setItem(key, JSON.stringify(result));
+      return result;
+    });
   }
 
   function renderPageContent(pageData){
@@ -1692,12 +1702,13 @@
     }
 
     var n = dailyAyahNumberFor(state.date);
-    var url = "https://api.alquran.cloud/v1/ayah/" + n + "/editions/" + QURAN_AR_EDITION + "," + QURAN_TR_EDITION;
-    fetch(url)
-      .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
-      .then(function(json){
-        if(!json || json.code !== 200 || !json.data || json.data.length < 2) throw new Error("bad response");
-        var ar = json.data[0], tr = json.data[1];
+    var base = "https://api.alquran.cloud/v1/ayah/" + n;
+    Promise.all([
+      fetchQuranEdition(base, QURAN_AR_EDITION),
+      fetchQuranEdition(base, QURAN_TR_EDITION)
+    ])
+      .then(function(results){
+        var ar = results[0], tr = results[1];
         var payload = {
           date: state.date,
           arabic: ar.text,
