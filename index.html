@@ -290,14 +290,20 @@
     </div>
   </div>
 
-  <!-- subtle geometric star texture, full page -->
+  <!-- subtle Osmanlı hat/tezhip esintili arabesk doku, tüm sayfa -->
   <div class="pattern-overlay" aria-hidden="true">
     <svg width="100%" height="100%">
       <defs>
-        <pattern id="girih" width="72" height="72" patternUnits="userSpaceOnUse">
-          <g stroke="var(--text)" stroke-width="1" fill="none">
-            <rect x="20" y="20" width="32" height="32" transform="rotate(45 36 36)"/>
-            <rect x="20" y="20" width="32" height="32"/>
+        <pattern id="girih" width="120" height="120" patternUnits="userSpaceOnUse">
+          <g stroke="var(--text)" stroke-width="1.1" fill="none">
+            <circle cx="60" cy="60" r="46" opacity=".55"/>
+            <path d="M60,14 C53,24 53,34 60,42 C67,34 67,24 60,14 Z"/>
+            <path d="M106,60 C96,53 86,53 78,60 C86,67 96,67 106,60 Z"/>
+            <path d="M60,106 C67,96 67,86 60,78 C53,86 53,96 60,106 Z"/>
+            <path d="M14,60 C24,67 34,67 42,60 C34,53 24,53 14,60 Z"/>
+            <circle cx="60" cy="60" r="7"/>
+            <path d="M60,53 C64,56 64,64 60,67 C56,64 56,56 60,53 Z"/>
+            <path d="M53,60 C56,56 64,56 67,60 C64,64 56,64 53,60 Z"/>
           </g>
         </pattern>
       </defs>
@@ -712,7 +718,7 @@
       <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border p-5 sm:p-6 card-surface max-h-[85vh] flex flex-col" style="border-color:var(--border)">
         <div class="flex items-center justify-between mb-4 shrink-0">
           <h2 class="font-serif text-lg font-semibold">Sureye Git</h2>
-          <button id="surahPickerClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <button id="surahPickerClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -725,37 +731,39 @@
   </div>
 
   <!-- FAB: sol alt köşe -->
+  <div id="fabBackdrop" class="hidden fixed inset-0 z-30" style="background:rgba(10,15,13,.45)"></div>
+
   <div id="fabContainer" class="fixed left-5 bottom-6 z-40 flex flex-col items-start gap-3">
     <div id="fabActions" class="hidden flex-col items-start gap-2">
-      <button id="fabRamadanBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.5A5.5 5.5 0 1 1 11.5 7a4.2 4.2 0 0 0 5.5 5.5Z"/><circle cx="19" cy="6" r=".6" fill="var(--gold)"/><circle cx="6" cy="9" r=".5" fill="var(--gold)"/></svg>
+      <button id="fabRamadanBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full pl-2.5 pr-4 py-2 transition-transform" style="background:var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.28)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,0,0,.16)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.5A5.5 5.5 0 1 1 11.5 7a4.2 4.2 0 0 0 5.5 5.5Z"/><circle cx="19" cy="6" r=".6" fill="var(--gold)"/><circle cx="6" cy="9" r=".5" fill="var(--gold)"/></svg>
         </span>
-        <span class="text-sm font-semibold whitespace-nowrap">Ramazan Modu</span>
+        <span class="text-sm font-semibold whitespace-nowrap" style="color:var(--silhouette)">Ramazan Modu</span>
       </button>
-      <button id="fabQiblaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l2.5 5-2.5 5-2.5-5Z"/></svg>
+      <button id="fabQiblaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full pl-2.5 pr-4 py-2 transition-transform" style="background:var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.28)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,0,0,.16)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l2.5 5-2.5 5-2.5-5Z"/></svg>
         </span>
-        <span class="text-sm font-semibold whitespace-nowrap">Kıble Yönü</span>
+        <span class="text-sm font-semibold whitespace-nowrap" style="color:var(--silhouette)">Kıble Yönü</span>
       </button>
-      <button id="fabKazaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
+      <button id="fabKazaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full pl-2.5 pr-4 py-2 transition-transform" style="background:var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.28)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,0,0,.16)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
         </span>
-        <span class="text-sm font-semibold whitespace-nowrap">Kaza Namazları</span>
+        <span class="text-sm font-semibold whitespace-nowrap" style="color:var(--silhouette)">Kaza Namazları</span>
       </button>
-      <button id="fabDuasBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+      <button id="fabDuasBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full pl-2.5 pr-4 py-2 transition-transform" style="background:var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.28)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,0,0,.16)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
         </span>
-        <span class="text-sm font-semibold whitespace-nowrap">Dualar ve Sureler</span>
+        <span class="text-sm font-semibold whitespace-nowrap" style="color:var(--silhouette)">Dualar ve Sureler</span>
       </button>
-      <button id="fabTeacherBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+      <button id="fabTeacherBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full pl-2.5 pr-4 py-2 transition-transform" style="background:var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.28)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,0,0,.16)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
         </span>
-        <span class="text-sm font-semibold whitespace-nowrap">Namaz Eğitmeni</span>
+        <span class="text-sm font-semibold whitespace-nowrap" style="color:var(--silhouette)">Namaz Eğitmeni</span>
       </button>
     </div>
     <button id="fabMainBtn" aria-label="Menü" aria-expanded="false" class="focus-ring w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform" style="background:var(--gold)">
@@ -767,14 +775,14 @@
   <!-- Uygulama Turu modalı -->
   <div id="appTourModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
     <div id="appTourBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
-    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface h-[88vh] sm:h-[600px] flex flex-col" style="border-color:var(--border)">
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h2 class="font-serif text-lg font-semibold">Uygulama Turu</h2>
-        <button id="appTourClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="appTourClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="flex-1 overflow-y-auto px-5">
+      <div class="flex-1 overflow-y-auto px-5 min-h-0">
         <div id="appTourIcon" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden" style="background:var(--gold-soft)"></div>
         <p id="appTourTitle" class="font-serif text-base font-semibold mb-3 text-center" style="color:var(--gold)"></p>
         <p id="appTourBody" class="text-sm leading-relaxed text-center" style="color:var(--text)"></p>
@@ -802,17 +810,17 @@
     <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h2 class="font-serif text-lg font-semibold">Ramazan Modu</h2>
-        <button id="ramadanClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="ramadanClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
 
       <div class="flex items-center justify-between px-5 pb-3 shrink-0">
-        <button id="ramadanPrevYear" aria-label="Önceki yıl" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+        <button id="ramadanPrevYear" aria-label="Önceki yıl" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <span id="ramadanYearLabel" class="font-serif text-base font-semibold"></span>
-        <button id="ramadanNextYear" aria-label="Sonraki yıl" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+        <button id="ramadanNextYear" aria-label="Sonraki yıl" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
@@ -831,7 +839,7 @@
     <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h2 class="font-serif text-lg font-semibold">Kıble Yönü</h2>
-        <button id="qiblaClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="qiblaClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -871,7 +879,7 @@
     <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h2 class="font-serif text-lg font-semibold">Kaza Namazları</h2>
-        <button id="kazaClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="kazaClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -886,32 +894,32 @@
   <!-- Namaz Eğitmeni modalı -->
   <div id="teacherModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
     <div id="teacherBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
-    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface h-[88vh] sm:h-[600px] flex flex-col" style="border-color:var(--border)">
 
       <!-- Menü görünümü -->
-      <div id="teacherMenuView">
+      <div id="teacherMenuView" class="flex flex-col flex-1 min-h-0">
         <div class="flex items-center justify-between p-5 pb-3 shrink-0">
           <h2 class="font-serif text-lg font-semibold">Namaz Eğitmeni</h2>
-          <button id="teacherClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <button id="teacherClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
-        <p class="px-5 text-sm mb-3" style="color:var(--muted)">Adım adım öğrenmek istediğin namazı seç.</p>
-        <div id="teacherMenuList" class="px-5 pb-5 space-y-2 overflow-y-auto"></div>
+        <p class="px-5 text-sm mb-3 shrink-0" style="color:var(--muted)">Adım adım öğrenmek istediğin namazı seç.</p>
+        <div id="teacherMenuList" class="px-5 pb-5 space-y-2 overflow-y-auto flex-1 min-h-0"></div>
       </div>
 
       <!-- Okuyucu görünümü -->
       <div id="teacherReaderView" class="hidden flex flex-col min-h-0 flex-1">
         <div class="flex items-center gap-3 p-5 pb-3 shrink-0">
-          <button id="teacherBackBtn" aria-label="Menüye dön" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+          <button id="teacherBackBtn" aria-label="Menüye dön" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--border); color:var(--text)">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h2 id="teacherGuideTitle" class="font-serif text-base font-semibold flex-1 truncate"></h2>
-          <button id="teacherClose2" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+          <button id="teacherClose2" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--border); color:var(--text)">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto px-5">
+        <div class="flex-1 overflow-y-auto px-5 min-h-0">
           <p id="teacherPageTitle" class="font-serif text-base font-semibold mb-3" style="color:var(--gold)"></p>
           <div id="teacherPageBody" class="text-sm leading-relaxed space-y-2" style="color:var(--text)"></div>
           <p class="text-[11px] mt-5 mb-2" style="color:var(--muted)">Bu rehber Hanefi mezhebine göre hazırlanmıştır. Hanefi âlimleri arasında bile bazı ayrıntılarda küçük görüş farklılıkları olabilir; kişisel fıkhî sorular için Diyanet veya bir din görevlisine danışmanı öneririz.</p>
@@ -941,7 +949,7 @@
     <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h2 class="font-serif text-lg font-semibold">Dualar ve Sureler</h2>
-        <button id="duasClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="duasClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -949,7 +957,7 @@
         <div id="duasListView" class="px-5 pb-6 space-y-3"></div>
         <div id="duasDetailView" class="hidden flex flex-col min-h-0 flex-1">
           <div class="flex items-center gap-3 px-5 pb-3 shrink-0">
-            <button id="duasBackBtn" aria-label="Listeye dön" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+            <button id="duasBackBtn" aria-label="Listeye dön" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--border); color:var(--text)">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h3 id="duasDetailTitle" class="font-serif text-base font-semibold flex-1 truncate"></h3>
@@ -979,7 +987,7 @@
     <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border p-5 sm:p-6 card-surface max-h-[88vh] overflow-y-auto" style="border-color:var(--border)">
       <div class="flex items-center justify-between mb-5">
         <h2 class="font-serif text-lg font-semibold">Ayarlar</h2>
-        <button id="settingsClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+        <button id="settingsClose" aria-label="Kapat" class="focus-ring w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--border); color:var(--text)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -1855,6 +1863,20 @@
     populateCitySelect(country, null);
   });
 
+  var openModalCount = 0;
+  function lockBodyScroll(){
+    openModalCount++;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+  }
+  function unlockBodyScroll(){
+    openModalCount = Math.max(0, openModalCount - 1);
+    if(openModalCount === 0){
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+  }
+
   function openSettingsModal(){
     var loc = loadLocation();
     locationStatusEl.textContent = "";
@@ -1875,10 +1897,12 @@
       });
 
     settingsModal.classList.remove("hidden");
+    lockBodyScroll();
   }
 
   function closeSettingsModal(){
     settingsModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   settingsBtn.addEventListener("click", openSettingsModal);
@@ -2352,9 +2376,11 @@
   function openSurahPicker(){
     surahPickerModal.classList.remove("hidden");
     if(!surahList) renderSurahList();
+    lockBodyScroll();
   }
   function closeSurahPicker(){
     surahPickerModal.classList.add("hidden");
+    unlockBodyScroll();
   }
   quranSurahPickerBtn.addEventListener("click", openSurahPicker);
   surahPickerClose.addEventListener("click", closeSurahPicker);
@@ -2574,6 +2600,7 @@
   var teacherNextBtn = document.getElementById("teacherNextBtn");
 
   var fabOpen = false;
+  var fabBackdropEl = document.getElementById("fabBackdrop");
   function setFabOpen(open){
     fabOpen = open;
     fabActions.classList.toggle("hidden", !open);
@@ -2581,8 +2608,10 @@
     fabIconPlus.classList.toggle("hidden", open);
     fabIconClose.classList.toggle("hidden", !open);
     fabMainBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    fabBackdropEl.classList.toggle("hidden", !open);
   }
   fabMainBtn.addEventListener("click", function(){ setFabOpen(!fabOpen); });
+  fabBackdropEl.addEventListener("click", function(){ setFabOpen(false); });
 
   /* ---- Yeniden kullanılan rekât yapıları (Hanefi mezhebine göre, adım adım) ---- */
   var ETTEHIYYATU = "\"Ettehiyyâtü lillâhi vessalevâtü vetayyibât. Esselâmü aleyke eyyühen-Nebiyyü ve rahmetullâhi ve berakâtüh. Esselâmü aleynâ ve alâ ibâdillâhis-sâlihîn. Eşhedü en lâ ilâhe illallah ve eşhedü enne Muhammeden abdühû ve resûlüh.\"";
@@ -2766,9 +2795,11 @@
     teacherReaderView.classList.remove("flex");
     teacherMenuView.classList.remove("hidden");
     teacherModal.classList.remove("hidden");
+    lockBodyScroll();
   }
   function closeTeacherModal(){
     teacherModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   fabTeacherBtn.addEventListener("click", openTeacherModal);
@@ -2974,9 +3005,11 @@
       duasLoaded = true;
       renderDuasList();
     }
+    lockBodyScroll();
   }
   function closeDuasModal(){
     duasModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   fabDuasBtn.addEventListener("click", openDuasModal);
@@ -3028,9 +3061,11 @@
     setFabOpen(false);
     renderKazaList();
     kazaModal.classList.remove("hidden");
+    lockBodyScroll();
   }
   function closeKazaModal(){
     kazaModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   fabKazaBtn.addEventListener("click", openKazaModal);
@@ -3156,9 +3191,11 @@
   function openQiblaModal(){
     setFabOpen(false);
     qiblaModal.classList.remove("hidden");
+    lockBodyScroll();
   }
   function closeQiblaModal(){
     qiblaModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   fabQiblaBtn.addEventListener("click", openQiblaModal);
@@ -3302,9 +3339,11 @@
         ramadanYearLabelEl.textContent = "Ramazan";
         ramadanListEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">Hicri yıl alınamadı. İnternetini kontrol edip tekrar dene.</p>';
       });
+    lockBodyScroll();
   }
   function closeRamadanModal(){
     ramadanModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   fabRamadanBtn.addEventListener("click", openRamadanModal);
@@ -3382,6 +3421,7 @@
   function finishOnboarding(){
     localStorage.setItem(ONBOARDING_KEY, "1");
     onboardingModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   onboardingNextBtn.addEventListener("click", function(){
@@ -3401,6 +3441,7 @@
     onboardingIndex = 0;
     renderOnboardingSlide();
     onboardingModal.classList.remove("hidden");
+    lockBodyScroll();
   })();
   /* ---------- Uygulama Turu ---------- */
   var appTourBtn = document.getElementById("appTourBtn");
@@ -3480,9 +3521,11 @@
     appTourIndex = 0;
     renderAppTourPage();
     appTourModal.classList.remove("hidden");
+    lockBodyScroll();
   }
   function closeAppTour(){
     appTourModal.classList.add("hidden");
+    unlockBodyScroll();
   }
 
   appTourBtn.addEventListener("click", openAppTour);
