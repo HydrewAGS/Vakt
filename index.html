@@ -210,11 +210,37 @@
     100%{ opacity: 0; transform: translateY(-46px) scale(1); }
   }
 
+  /* ---- Uygulama Turu ikon animasyonları ---- */
+  .tour-spin{ transform-box: fill-box; transform-origin: center; animation: tourSpin 4s linear infinite; }
+  @keyframes tourSpin{ to{ transform: rotate(360deg); } }
+
+  .tour-swing{ transform-box: fill-box; transform-origin: center; animation: tourSwing 2.6s ease-in-out infinite; }
+  @keyframes tourSwing{ 0%,100%{ transform: rotate(-16deg); } 50%{ transform: rotate(16deg); } }
+
+  .tour-grow{ transform-box: fill-box; transform-origin: bottom; animation: tourGrow 1.6s ease-in-out infinite alternate; }
+  @keyframes tourGrow{ 0%{ transform: scaleY(.35); } 100%{ transform: scaleY(1); } }
+
+  .tour-dot{ transform-box: fill-box; transform-origin: center; animation: tourDot 2.4s ease-in-out infinite; }
+  @keyframes tourDot{ 0%,100%{ opacity: .3; transform: scale(1); } 40%{ opacity: 1; transform: scale(1.2); } }
+
+  .tour-sweep{ animation: tourSweep 2.2s ease-in-out infinite; }
+  @keyframes tourSweep{ 0%{ transform: translateX(-14px); opacity: 0; } 50%{ opacity: 1; } 100%{ transform: translateX(14px); opacity: 0; } }
+
+  .tour-sweep-v{ animation: tourSweepV 2.2s ease-in-out infinite; }
+  @keyframes tourSweepV{ 0%{ transform: translateY(-14px); opacity: 0; } 50%{ opacity: 1; } 100%{ transform: translateY(14px); opacity: 0; } }
+
+  .tour-breathe{ transform-box: fill-box; transform-origin: center; animation: tourBreathe 2.4s ease-in-out infinite; }
+  @keyframes tourBreathe{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.1); } }
+
+  .tour-bounce{ animation: tourBounce 1.8s ease-in-out infinite; }
+  @keyframes tourBounce{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+
   @media (prefers-reduced-motion: reduce){
     .breathe, .cloud-1, .cloud-2, .bird-1, .bird-2, .dome-shimmer{ animation: none; opacity: 0; }
     .node-ripple{ display: none; }
     .card-pop{ animation: none; }
     .xp-float{ display: none; }
+    .tour-spin, .tour-swing, .tour-grow, .tour-dot, .tour-sweep, .tour-sweep-v, .tour-breathe, .tour-bounce{ animation: none; }
   }
 
   #fabMainBtn:active{ transform: scale(.92); }
@@ -242,6 +268,7 @@
   #calPrev:hover, #calNext:hover{ background: var(--border); color: var(--text); }
   #quranPrevBtn:disabled, #quranNextBtn:disabled{ opacity: .35; }
   #teacherPrevBtn:disabled, #teacherNextBtn:disabled{ opacity: .35; }
+  #appTourPrevBtn:disabled, #appTourNextBtn:disabled{ opacity: .35; }
 
   .cal-prayer-row{
     display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-radius: 12px;
@@ -251,6 +278,17 @@
 </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+
+  <!-- İlk açılış karşılama -->
+  <div id="onboardingModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-5">
+    <div class="absolute inset-0" style="background:var(--bg)"></div>
+    <div class="relative w-full max-w-sm rounded-3xl border card-surface p-6 flex flex-col fade-in" style="border-color:var(--border); max-height:92vh;">
+      <button id="onboardingSkip" type="button" class="focus-ring self-end text-xs mb-1 underline decoration-dotted" style="color:var(--muted)">Geç</button>
+      <div id="onboardingSlideContent" class="flex-1 overflow-y-auto text-center px-1"></div>
+      <div id="onboardingDots" class="flex items-center justify-center gap-1.5 my-5"></div>
+      <button id="onboardingNextBtn" type="button" class="focus-ring w-full rounded-xl py-3 text-sm font-semibold" style="background:var(--gold); color:var(--silhouette)">Devam Et</button>
+    </div>
+  </div>
 
   <!-- subtle geometric star texture, full page -->
   <div class="pattern-overlay" aria-hidden="true">
@@ -689,6 +727,24 @@
   <!-- FAB: sol alt köşe -->
   <div id="fabContainer" class="fixed left-5 bottom-6 z-40 flex flex-col items-start gap-3">
     <div id="fabActions" class="hidden flex-col items-start gap-2">
+      <button id="fabRamadanBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.5A5.5 5.5 0 1 1 11.5 7a4.2 4.2 0 0 0 5.5 5.5Z"/><circle cx="19" cy="6" r=".6" fill="var(--gold)"/><circle cx="6" cy="9" r=".5" fill="var(--gold)"/></svg>
+        </span>
+        <span class="text-sm font-semibold whitespace-nowrap">Ramazan Modu</span>
+      </button>
+      <button id="fabQiblaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l2.5 5-2.5 5-2.5-5Z"/></svg>
+        </span>
+        <span class="text-sm font-semibold whitespace-nowrap">Kıble Yönü</span>
+      </button>
+      <button id="fabKazaBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
+        </span>
+        <span class="text-sm font-semibold whitespace-nowrap">Kaza Namazları</span>
+      </button>
       <button id="fabDuasBtn" type="button" class="focus-ring flex items-center gap-2.5 rounded-full border pl-2.5 pr-4 py-2 shadow-lg transition-transform" style="background:var(--surface); border-color:var(--border)">
         <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
@@ -706,6 +762,125 @@
       <svg id="fabIconPlus" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       <svg id="fabIconClose" class="w-6 h-6 hidden" viewBox="0 0 24 24" fill="none" stroke="var(--silhouette)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
+  </div>
+
+  <!-- Uygulama Turu modalı -->
+  <div id="appTourModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
+    <div id="appTourBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+      <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+        <h2 class="font-serif text-lg font-semibold">Uygulama Turu</h2>
+        <button id="appTourClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-5">
+        <div id="appTourIcon" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden" style="background:var(--gold-soft)"></div>
+        <p id="appTourTitle" class="font-serif text-base font-semibold mb-3 text-center" style="color:var(--gold)"></p>
+        <p id="appTourBody" class="text-sm leading-relaxed text-center" style="color:var(--text)"></p>
+      </div>
+      <div class="p-5 pt-3 shrink-0">
+        <div class="flex items-center justify-between mb-3">
+          <button id="appTourPrevBtn" aria-label="Önceki" class="focus-ring w-9 h-9 rounded-full border flex items-center justify-center shrink-0" style="border-color:var(--border); background:var(--bg)">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span id="appTourIndicator" class="text-xs font-semibold" style="color:var(--muted)"></span>
+          <button id="appTourNextBtn" aria-label="Sonraki" class="focus-ring w-9 h-9 rounded-full border flex items-center justify-center shrink-0" style="border-color:var(--border); background:var(--bg)">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="h-1 rounded-full overflow-hidden" style="background:var(--border)">
+          <div id="appTourProgressBar" class="h-full rounded-full" style="background:var(--gold); width:0%; transition:width .3s ease"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ramazan Modu modalı -->
+  <div id="ramadanModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
+    <div id="ramadanBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+      <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+        <h2 class="font-serif text-lg font-semibold">Ramazan Modu</h2>
+        <button id="ramadanClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between px-5 pb-3 shrink-0">
+        <button id="ramadanPrevYear" aria-label="Önceki yıl" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span id="ramadanYearLabel" class="font-serif text-base font-semibold"></span>
+        <button id="ramadanNextYear" aria-label="Sonraki yıl" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-5 pb-6">
+        <p id="ramadanSummary" class="text-sm mb-3" style="color:var(--muted)"></p>
+        <div id="ramadanList" class="space-y-2"></div>
+        <p class="text-[11px] mt-4" style="color:var(--muted)">İmsakiye, Ayarlar'da seçtiğin şehre ve Diyanet hesaplama yöntemine göre Al Quran Cloud / Aladhan API'den hesaplanır. Hicri-Miladi çevrimlerde bir günlük fark olabilir; hilal gözlemine göre resmi başlangıç değişebilir.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kıble Yönü modalı -->
+  <div id="qiblaModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
+    <div id="qiblaBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+      <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+        <h2 class="font-serif text-lg font-semibold">Kıble Yönü</h2>
+        <button id="qiblaClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-5 pb-6 text-center">
+        <p class="text-sm mb-4" style="color:var(--muted)">Konumuna göre Kâbe'nin yönünü hesaplar.</p>
+
+        <button id="qiblaLocateBtn" type="button" class="focus-ring w-full rounded-xl py-2.5 text-sm font-semibold mb-2" style="background:var(--gold); color:var(--silhouette)">Konumumu Bul</button>
+        <p id="qiblaStatus" class="text-xs mb-4 min-h-[1em]" style="color:var(--muted)"></p>
+
+        <div id="qiblaResult" class="hidden">
+          <svg viewBox="0 0 200 200" class="w-52 h-52 mx-auto mb-4">
+            <circle cx="100" cy="100" r="92" fill="none" stroke="var(--border)" stroke-width="2"/>
+            <circle cx="100" cy="100" r="2" fill="var(--muted)"/>
+            <text x="100" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">K</text>
+            <text x="181" y="105" text-anchor="middle" font-size="13" fill="var(--muted)">D</text>
+            <text x="100" y="184" text-anchor="middle" font-size="13" fill="var(--muted)">G</text>
+            <text x="19" y="105" text-anchor="middle" font-size="13" fill="var(--muted)">B</text>
+            <g id="qiblaNeedle" style="transform-origin:100px 100px; transition: transform .2s linear;">
+              <line x1="100" y1="100" x2="100" y2="28" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/>
+              <polygon points="100,16 91,34 109,34" fill="var(--gold)"/>
+              <circle cx="100" cy="100" r="7" fill="var(--gold)"/>
+            </g>
+          </svg>
+          <p id="qiblaBearingText" class="text-sm font-semibold mb-3"></p>
+          <button id="qiblaCompassBtn" type="button" class="focus-ring w-full rounded-xl py-2.5 text-sm font-semibold border" style="border-color:var(--border); color:var(--text)">Pusula Modunu Dene</button>
+          <p id="qiblaCompassStatus" class="text-xs mt-2 min-h-[1em]" style="color:var(--muted)"></p>
+        </div>
+
+        <p class="text-[11px] mt-5" style="color:var(--muted)">Pusula modu cihazın manyetik sensörünü kullanır; tüm cihazlarda aynı hassasiyette çalışmayabilir. Emin olmadığında üstteki dereceyi gerçek bir pusulayla karşılaştır.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kaza Namazları modalı -->
+  <div id="kazaModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
+    <div id="kazaBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.55)"></div>
+    <div class="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border card-surface max-h-[88vh] flex flex-col" style="border-color:var(--border)">
+      <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+        <h2 class="font-serif text-lg font-semibold">Kaza Namazları</h2>
+        <button id="kazaClose" aria-label="Kapat" class="focus-ring w-8 h-8 rounded-full flex items-center justify-center" style="color:var(--muted)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-5 pb-6">
+        <p id="kazaSummary" class="text-sm mb-4" style="color:var(--muted)"></p>
+        <div id="kazaList" class="space-y-2"></div>
+        <p class="text-[11px] mt-4" style="color:var(--muted)">İşaretlemediğin geçmiş günler otomatik olarak buraya kaza borcu olarak eklenir. Bir vakti kaza olarak kıldığında "Kıldım" butonuna, geçmişten eklemen gereken bir borç olduğunda "+" butonuna dokun.</p>
+      </div>
+    </div>
   </div>
 
   <!-- Namaz Eğitmeni modalı -->
@@ -789,6 +964,15 @@
     <span id="toastText"></span>
   </div>
 
+  <!-- Yedekleme hatırlatma kartı -->
+  <div id="backupReminderToast" class="fixed left-1/2 bottom-6 -translate-x-1/2 translate-y-4 opacity-0 pointer-events-none w-[calc(100%-2.5rem)] max-w-sm px-5 py-4 rounded-2xl text-sm z-[55] shadow-lg transition-all duration-500" style="background:var(--surface); border:1px solid var(--gold); color:var(--text)">
+    <p class="mb-3 leading-snug">İlerlemeni yedeklemeyeli 3 günden fazla oldu <span class="align-middle">💾</span></p>
+    <div class="flex gap-2">
+      <button id="backupReminderNowBtn" type="button" class="focus-ring flex-1 rounded-xl py-2 text-sm font-semibold" style="background:var(--gold); color:var(--silhouette)">Şimdi Yedekle</button>
+      <button id="backupReminderLaterBtn" type="button" class="focus-ring flex-1 rounded-xl py-2 text-sm font-semibold border" style="border-color:var(--border); color:var(--muted)">Daha Sonra</button>
+    </div>
+  </div>
+
   <!-- Ayarlar modalı -->
   <div id="settingsModal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
     <div id="settingsBackdrop" class="absolute inset-0" style="background:rgba(10,15,13,.5)"></div>
@@ -829,6 +1013,26 @@
       </button>
       <p id="notifStatus" class="text-xs mt-2 min-h-[1em]" style="color:var(--muted)"></p>
       <p class="text-[11px] mt-1" style="color:var(--muted)">Not: bildirimler yalnızca Vakt açıkken (arka planda bile olsa) çalışır; tarayıcı tamamen kapalıyken gelmez.</p>
+
+      <label class="block text-xs font-semibold mb-2 mt-6 tracking-wide" style="color:var(--muted)">YEDEKLEME</label>
+      <p class="text-[11px] mb-3" style="color:var(--muted)">Serin, seviyen, XP'in ve takvim geçmişin sadece bu cihazda saklanıyor. Telefon değiştirmeden ya da tarayıcı verilerini silmeden önce bir yedek almanı öneririz.</p>
+      <div class="flex gap-2">
+        <button id="backupExportBtn" type="button" class="focus-ring flex-1 rounded-xl py-2.5 text-sm font-semibold border" style="border-color:var(--gold); color:var(--gold); background:var(--gold-soft)">Yedek İndir</button>
+        <button id="backupImportBtn" type="button" class="focus-ring flex-1 rounded-xl py-2.5 text-sm font-semibold border" style="border-color:var(--border); color:var(--text); background:var(--bg)">Yedekten Yükle</button>
+      </div>
+      <input type="file" id="backupFileInput" accept=".json,application/json" class="hidden">
+      <p id="backupStatus" class="text-xs mt-2 min-h-[1em]" style="color:var(--muted)"></p>
+
+      <label class="block text-xs font-semibold mb-2 mt-6 tracking-wide" style="color:var(--muted)">YARDIM</label>
+      <button id="appTourBtn" type="button" class="focus-ring w-full flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left" style="border-color:var(--border); background:var(--bg)">
+        <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:var(--gold-soft)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </span>
+        <span class="flex-1">
+          <span class="block text-sm font-semibold">Uygulama Turu</span>
+          <span class="block text-xs mt-0.5" style="color:var(--muted)">Tüm sekmeleri ve araçları tekrar keşfet</span>
+        </span>
+      </button>
 
       <p class="text-center text-[11px] mt-5" style="color:var(--muted)">Vakitler <a href="https://aladhan.com" target="_blank" rel="noopener" class="underline">Aladhan API</a>, ülke/şehir listesi <a href="https://countriesnow.space" target="_blank" rel="noopener" class="underline">CountriesNow API</a> üzerinden alınır.</p>
     </div>
@@ -1077,6 +1281,12 @@
     return o;
   }
 
+  function emptyKazaDebt(){
+    var o = {};
+    PRAYER_KEYS.forEach(function(k){ o[k] = 0; });
+    return o;
+  }
+
   function loadState(){
     var raw = localStorage.getItem(STORAGE_KEY);
     var state;
@@ -1084,7 +1294,7 @@
       try{ state = JSON.parse(raw); }catch(e){ state = null; }
     }
     if(!state || !state.date || !state.prayers){
-      state = { date: todayStr(), prayers: emptyPrayers(), streak: 0, xp: 0, history: {} };
+      state = { date: todayStr(), prayers: emptyPrayers(), streak: 0, xp: 0, history: {}, kazaDebt: emptyKazaDebt() };
       saveState(state);
       return state;
     }
@@ -1094,6 +1304,12 @@
     if(!state.history || typeof state.history !== "object"){
       state.history = {};
     }
+    if(!state.kazaDebt || typeof state.kazaDebt !== "object"){
+      state.kazaDebt = emptyKazaDebt();
+    }
+    PRAYER_KEYS.forEach(function(k){
+      if(typeof state.kazaDebt[k] !== "number" || isNaN(state.kazaDebt[k])) state.kazaDebt[k] = 0;
+    });
 
     var today = todayStr();
     if(state.date !== today){
@@ -1101,6 +1317,12 @@
       var allDone = PRAYER_KEYS.every(function(k){ return !!state.prayers[k]; });
 
       state.history[state.date] = Object.assign({}, state.prayers);
+
+      PRAYER_KEYS.forEach(function(k){
+        if(!state.prayers[k]){
+          state.kazaDebt[k] = (state.kazaDebt[k] || 0) + 1;
+        }
+      });
 
       if(diff === 1 && allDone){
         state.streak = (state.streak || 0) + 1;
@@ -1262,6 +1484,7 @@
       renderCalendarDetail();
       renderStatsChart();
       fetchAndApplyPrayerTimes({ announce: false });
+      checkBackupReminder();
     }
   }, 30000);
 
@@ -1871,6 +2094,118 @@
   });
 
   updateNotifUI();
+
+  /* ---------- Yedekleme ---------- */
+  var LAST_BACKUP_KEY = "vakt_last_backup_at";
+  var LAST_BACKUP_PROMPT_KEY = "vakt_last_backup_prompt_at";
+  var BACKUP_REMINDER_MS = 3 * 24 * 60 * 60 * 1000;
+
+  function getBackupKeys(){
+    return [STORAGE_KEY, THEME_KEY, LOCATION_KEY, NOTIF_ENABLED_KEY, QURAN_LAST_PAGE_KEY];
+  }
+  var backupExportBtn = document.getElementById("backupExportBtn");
+  var backupImportBtn = document.getElementById("backupImportBtn");
+  var backupFileInput = document.getElementById("backupFileInput");
+  var backupStatusEl = document.getElementById("backupStatus");
+
+  function exportBackup(){
+    var data = {};
+    getBackupKeys().forEach(function(key){
+      var val = localStorage.getItem(key);
+      if(val !== null) data[key] = val;
+    });
+    var payload = { app: "vakt", version: 1, exportedAt: new Date().toISOString(), data: data };
+
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "vakt-yedek-" + todayStr() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+
+    localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+    backupStatusEl.textContent = "Yedek indirildi.";
+    showToast("Yedek indirildi \u2713");
+  }
+
+  function importBackupFile(file){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var payload;
+      try{
+        payload = JSON.parse(reader.result);
+        if(!payload || payload.app !== "vakt" || !payload.data) throw new Error("format");
+      }catch(e){
+        backupStatusEl.textContent = "Bu dosya geçerli bir Vakt yedeği değil.";
+        return;
+      }
+
+      var ok = window.confirm("Bu, cihazdaki mevcut seri/seviye/takvim verilerinin üzerine yazacak. Devam etmek istiyor musun?");
+      if(!ok) return;
+
+      var backupKeys = getBackupKeys();
+      backupKeys.forEach(function(key){
+        if(payload.data[key] !== undefined){
+          localStorage.setItem(key, payload.data[key]);
+        }
+      });
+
+      localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+      backupStatusEl.textContent = "Yedek yüklendi, uygulama yenileniyor…";
+      setTimeout(function(){ location.reload(); }, 900);
+    };
+    reader.onerror = function(){
+      backupStatusEl.textContent = "Dosya okunamadı.";
+    };
+    reader.readAsText(file);
+  }
+
+  backupExportBtn.addEventListener("click", exportBackup);
+  backupImportBtn.addEventListener("click", function(){ backupFileInput.click(); });
+  backupFileInput.addEventListener("change", function(){
+    var file = backupFileInput.files && backupFileInput.files[0];
+    if(file) importBackupFile(file);
+    backupFileInput.value = "";
+  });
+
+  function checkBackupReminder(){
+    var lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
+    var lastPrompt = localStorage.getItem(LAST_BACKUP_PROMPT_KEY);
+    var now = Date.now();
+    var sinceBackup = lastBackup ? now - new Date(lastBackup).getTime() : Infinity;
+    var sincePrompt = lastPrompt ? now - new Date(lastPrompt).getTime() : Infinity;
+
+    if(sinceBackup >= BACKUP_REMINDER_MS && sincePrompt >= BACKUP_REMINDER_MS){
+      showBackupReminderBanner();
+      localStorage.setItem(LAST_BACKUP_PROMPT_KEY, new Date().toISOString());
+    }
+  }
+
+  var backupReminderToastEl = document.getElementById("backupReminderToast");
+  var backupReminderNowBtn = document.getElementById("backupReminderNowBtn");
+  var backupReminderLaterBtn = document.getElementById("backupReminderLaterBtn");
+
+  function showBackupReminderBanner(){
+    backupReminderToastEl.classList.remove("opacity-0", "translate-y-4", "pointer-events-none");
+    backupReminderToastEl.classList.add("opacity-100", "translate-y-0");
+  }
+  function hideBackupReminderBanner(){
+    backupReminderToastEl.classList.add("opacity-0", "translate-y-4", "pointer-events-none");
+    backupReminderToastEl.classList.remove("opacity-100", "translate-y-0");
+  }
+
+  backupReminderNowBtn.addEventListener("click", function(){
+    hideBackupReminderBanner();
+    exportBackup();
+  });
+  backupReminderLaterBtn.addEventListener("click", function(){
+    hideBackupReminderBanner();
+  });
+
+  setTimeout(checkBackupReminder, 2500);
 
   function fetchAndApplyPrayerTimes(opts){
     opts = opts || {};
@@ -2659,6 +2994,514 @@
       openDuaDetail(parseInt(duaRow.getAttribute("data-index"), 10));
     }
   });
+
+  /* ---------- Kaza Namazları ---------- */
+  var fabKazaBtn = document.getElementById("fabKazaBtn");
+  var kazaModal = document.getElementById("kazaModal");
+  var kazaBackdrop = document.getElementById("kazaBackdrop");
+  var kazaClose = document.getElementById("kazaClose");
+  var kazaSummaryEl = document.getElementById("kazaSummary");
+  var kazaListEl = document.getElementById("kazaList");
+
+  function renderKazaList(){
+    var total = PRAYER_KEYS.reduce(function(sum, k){ return sum + (state.kazaDebt[k] || 0); }, 0);
+    kazaSummaryEl.textContent = total === 0
+      ? "Şu anda kaza borcun yok. Ne güzel!"
+      : "Toplam kaza borcun: " + total + " vakit.";
+
+    var html = "";
+    PRAYER_KEYS.forEach(function(key){
+      var count = state.kazaDebt[key] || 0;
+      html += '<div class="flex items-center gap-3 rounded-2xl border px-4 py-3 card-surface" style="border-color:var(--border)">'
+        + '<span class="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 font-serif text-base" style="border-color:' + (count > 0 ? "var(--gold)" : "var(--border)") + '; color:' + (count > 0 ? "var(--gold)" : "var(--muted)") + '">' + count + '</span>'
+        + '<span class="flex-1 text-sm font-semibold">' + escapeHtml(PRAYER_META[key].label) + '</span>'
+        + '<button type="button" class="kaza-add-btn focus-ring w-8 h-8 rounded-full border flex items-center justify-center" style="border-color:var(--border)" data-key="' + key + '" aria-label="Kaza borcu ekle">'
+        + '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+        + '</button>'
+        + '<button type="button" class="kaza-done-btn focus-ring rounded-full px-3 py-1.5 text-xs font-semibold" style="background:' + (count > 0 ? "var(--gold)" : "var(--border)") + '; color:' + (count > 0 ? "var(--silhouette)" : "var(--muted)") + '"' + (count === 0 ? " disabled" : "") + ' data-key="' + key + '">Kıldım</button>'
+        + '</div>';
+    });
+    kazaListEl.innerHTML = html;
+  }
+
+  function openKazaModal(){
+    setFabOpen(false);
+    renderKazaList();
+    kazaModal.classList.remove("hidden");
+  }
+  function closeKazaModal(){
+    kazaModal.classList.add("hidden");
+  }
+
+  fabKazaBtn.addEventListener("click", openKazaModal);
+  kazaClose.addEventListener("click", closeKazaModal);
+  kazaBackdrop.addEventListener("click", closeKazaModal);
+
+  kazaListEl.addEventListener("click", function(e){
+    var addBtn = e.target.closest(".kaza-add-btn");
+    if(addBtn){
+      var addKey = addBtn.getAttribute("data-key");
+      state.kazaDebt[addKey] = (state.kazaDebt[addKey] || 0) + 1;
+      saveState(state);
+      renderKazaList();
+      return;
+    }
+    var doneBtn = e.target.closest(".kaza-done-btn");
+    if(doneBtn && !doneBtn.disabled){
+      var doneKey = doneBtn.getAttribute("data-key");
+      state.kazaDebt[doneKey] = Math.max(0, (state.kazaDebt[doneKey] || 0) - 1);
+      saveState(state);
+      renderKazaList();
+      showToast(PRAYER_META[doneKey].label + " kazası kılındı \u2713");
+    }
+  });
+  /* ---------- Kıble Yönü ---------- */
+  var KAABA_LAT = 21.4225, KAABA_LON = 39.8262;
+
+  var fabQiblaBtn = document.getElementById("fabQiblaBtn");
+  var qiblaModal = document.getElementById("qiblaModal");
+  var qiblaBackdrop = document.getElementById("qiblaBackdrop");
+  var qiblaClose = document.getElementById("qiblaClose");
+  var qiblaLocateBtn = document.getElementById("qiblaLocateBtn");
+  var qiblaStatusEl = document.getElementById("qiblaStatus");
+  var qiblaResultEl = document.getElementById("qiblaResult");
+  var qiblaBearingTextEl = document.getElementById("qiblaBearingText");
+  var qiblaNeedleEl = document.getElementById("qiblaNeedle");
+  var qiblaCompassBtn = document.getElementById("qiblaCompassBtn");
+  var qiblaCompassStatusEl = document.getElementById("qiblaCompassStatus");
+
+  var qiblaBearing = null;
+  var qiblaHeading = null;
+  var qiblaCompassActive = false;
+
+  function toRad(d){ return d * Math.PI / 180; }
+  function toDeg(r){ return r * 180 / Math.PI; }
+
+  function computeQiblaBearing(lat, lon){
+    var phi1 = toRad(lat), phi2 = toRad(KAABA_LAT);
+    var deltaLambda = toRad(KAABA_LON - lon);
+    var y = Math.sin(deltaLambda) * Math.cos(phi2);
+    var x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+
+  var QIBLA_CARDINALS = ["K","KKD","KD","DKD","D","DGD","GD","GGD","G","GGB","GB","BGB","B","BKB","KB","KKB"];
+  function bearingToCardinal(b){
+    return QIBLA_CARDINALS[Math.round(b / 22.5) % 16];
+  }
+
+  function updateQiblaNeedle(){
+    if(qiblaBearing == null) return;
+    var angle = (qiblaCompassActive && qiblaHeading != null)
+      ? ((qiblaBearing - qiblaHeading) + 360) % 360
+      : qiblaBearing;
+    qiblaNeedleEl.style.transform = "rotate(" + angle + "deg)";
+  }
+
+  function locateForQibla(){
+    qiblaStatusEl.textContent = "Konum alınıyor…";
+    if(!navigator.geolocation){
+      qiblaStatusEl.textContent = "Bu tarayıcı konum özelliğini desteklemiyor.";
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      qiblaBearing = computeQiblaBearing(pos.coords.latitude, pos.coords.longitude);
+      qiblaBearingTextEl.textContent = "Kıble yönü: Kuzeyden saat yönünde " + Math.round(qiblaBearing) + "° (" + bearingToCardinal(qiblaBearing) + ")";
+      qiblaResultEl.classList.remove("hidden");
+      qiblaStatusEl.textContent = "";
+      updateQiblaNeedle();
+    }, function(){
+      qiblaStatusEl.textContent = "Konum alınamadı. Tarayıcı ayarlarından konum izni verip tekrar dene.";
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 });
+  }
+
+  function handleQiblaOrientation(e){
+    var heading = null;
+    if(typeof e.webkitCompassHeading === "number"){
+      heading = e.webkitCompassHeading;
+    } else if(e.alpha != null && e.absolute){
+      heading = (360 - e.alpha) % 360;
+    } else if(e.alpha != null){
+      heading = (360 - e.alpha) % 360;
+    }
+    if(heading != null){
+      qiblaHeading = heading;
+      updateQiblaNeedle();
+    }
+  }
+
+  function startQiblaCompass(){
+    if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+      DeviceOrientationEvent.requestPermission().then(function(state){
+        if(state === "granted"){
+          qiblaCompassActive = true;
+          window.addEventListener("deviceorientation", handleQiblaOrientation, true);
+          qiblaCompassStatusEl.textContent = "Pusula aktif — telefonunu çevirerek yönü bul.";
+        } else {
+          qiblaCompassStatusEl.textContent = "Pusula izni verilmedi.";
+        }
+      }).catch(function(){
+        qiblaCompassStatusEl.textContent = "Pusula bu cihazda desteklenmiyor.";
+      });
+    } else if(typeof DeviceOrientationEvent !== "undefined"){
+      qiblaCompassActive = true;
+      window.addEventListener("deviceorientationabsolute", handleQiblaOrientation, true);
+      window.addEventListener("deviceorientation", handleQiblaOrientation, true);
+      qiblaCompassStatusEl.textContent = "Pusula aktif — telefonunu çevirerek yönü bul.";
+    } else {
+      qiblaCompassStatusEl.textContent = "Bu cihaz/tarayıcı pusulayı desteklemiyor.";
+    }
+  }
+
+  function openQiblaModal(){
+    setFabOpen(false);
+    qiblaModal.classList.remove("hidden");
+  }
+  function closeQiblaModal(){
+    qiblaModal.classList.add("hidden");
+  }
+
+  fabQiblaBtn.addEventListener("click", openQiblaModal);
+  qiblaClose.addEventListener("click", closeQiblaModal);
+  qiblaBackdrop.addEventListener("click", closeQiblaModal);
+  qiblaLocateBtn.addEventListener("click", locateForQibla);
+  qiblaCompassBtn.addEventListener("click", startQiblaCompass);
+  /* ---------- Ramazan Modu ---------- */
+  var RAMADAN_CACHE_PREFIX = "vakt_ramadan_";
+  var fabRamadanBtn = document.getElementById("fabRamadanBtn");
+  var ramadanModal = document.getElementById("ramadanModal");
+  var ramadanBackdrop = document.getElementById("ramadanBackdrop");
+  var ramadanClose = document.getElementById("ramadanClose");
+  var ramadanPrevYearBtn = document.getElementById("ramadanPrevYear");
+  var ramadanNextYearBtn = document.getElementById("ramadanNextYear");
+  var ramadanYearLabelEl = document.getElementById("ramadanYearLabel");
+  var ramadanSummaryEl = document.getElementById("ramadanSummary");
+  var ramadanListEl = document.getElementById("ramadanList");
+
+  var ramadanViewYear = null;
+  var ramadanLoadToken = 0;
+
+  function fetchTodayHijriYear(){
+    return fetch("https://api.aladhan.com/v1/gToH")
+      .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
+      .then(function(json){
+        if(!json || json.code !== 200 || !json.data || !json.data.hijri) throw new Error("bad response");
+        return parseInt(json.data.hijri.year, 10);
+      });
+  }
+
+  function stripTz(t){
+    return (t || "").split(" ")[0];
+  }
+
+  function loadRamadanCalendar(hijriYear, city, country){
+    var cacheKey = RAMADAN_CACHE_PREFIX + hijriYear + "_" + city.toLowerCase().replace(/[^a-z0-9]/g, "");
+    try{
+      var cached = JSON.parse(localStorage.getItem(cacheKey));
+      if(cached && cached.length) return Promise.resolve(cached);
+    }catch(e){ /* yok say */ }
+
+    var url = "https://api.aladhan.com/v1/calendarByCity?city=" + encodeURIComponent(city)
+      + "&country=" + encodeURIComponent(country) + "&method=13&month=9&year=" + hijriYear + "&hijri=true";
+    return fetch(url)
+      .then(function(res){ if(!res.ok) throw new Error("network"); return res.json(); })
+      .then(function(json){
+        if(!json || json.code !== 200 || !json.data || !json.data.length) throw new Error("bad response");
+        var days = json.data.map(function(d){
+          return {
+            hijriDay: d.date.hijri.day,
+            gregorian: d.date.gregorian.date,
+            weekday: d.date.gregorian.weekday.en,
+            imsak: stripTz(d.timings.Imsak),
+            iftar: stripTz(d.timings.Maghrib)
+          };
+        });
+        localStorage.setItem(cacheKey, JSON.stringify(days));
+        return days;
+      });
+  }
+
+  function ddmmyyyyToComparable(s){
+    var p = s.split("-");
+    return p[2] + p[1] + p[0];
+  }
+
+  function renderRamadanList(days){
+    var todayComparable = ddmmyyyyToComparable(pad2(new Date().getDate()) + "-" + pad2(new Date().getMonth() + 1) + "-" + new Date().getFullYear());
+    var firstComparable = ddmmyyyyToComparable(days[0].gregorian);
+    var lastComparable = ddmmyyyyToComparable(days[days.length - 1].gregorian);
+
+    var startLabel = days[0].gregorian.split("-").slice(0, 2).join("/");
+    var endLabel = days[days.length - 1].gregorian + "";
+    endLabel = endLabel.split("-").slice(0, 2).join("/") + "/" + endLabel.split("-")[2];
+
+    if(todayComparable < firstComparable){
+      ramadanSummaryEl.textContent = startLabel + " – " + endLabel + " arası (" + days.length + " gün). Henüz başlamadı.";
+    } else if(todayComparable > lastComparable){
+      ramadanSummaryEl.textContent = startLabel + " – " + endLabel + " arası (" + days.length + " gün). Bu Ramazan sona erdi.";
+    } else {
+      var todayIdx = days.findIndex(function(d){ return ddmmyyyyToComparable(d.gregorian) === todayComparable; });
+      ramadanSummaryEl.textContent = (todayIdx >= 0 ? "Bugün Ramazan'ın " + (todayIdx + 1) + ". günü. " : "") + startLabel + " – " + endLabel + " arası (" + days.length + " gün).";
+    }
+
+    var html = days.map(function(d, i){
+      var isToday = ddmmyyyyToComparable(d.gregorian) === todayComparable;
+      var dateParts = d.gregorian.split("-");
+      return '<div class="rounded-xl border px-3.5 py-2.5" style="border-color:' + (isToday ? "var(--gold)" : "var(--border)") + '; background:' + (isToday ? "var(--gold-soft)" : "var(--surface)") + '">'
+        + '<div class="flex items-center justify-between mb-1">'
+        + '<span class="text-sm font-semibold" style="color:var(--gold)">' + (i + 1) + '. gün</span>'
+        + '<span class="text-xs" style="color:var(--muted)">' + dateParts[0] + "." + dateParts[1] + "." + dateParts[2] + '</span>'
+        + '</div>'
+        + '<div class="flex items-center justify-between text-sm">'
+        + '<span>İmsak <span class="font-semibold">' + escapeHtml(d.imsak) + '</span></span>'
+        + '<span>İftar <span class="font-semibold">' + escapeHtml(d.iftar) + '</span></span>'
+        + '</div>'
+        + '</div>';
+    }).join("");
+    ramadanListEl.innerHTML = html;
+  }
+
+  function renderRamadanForYear(){
+    ramadanYearLabelEl.textContent = "Ramazan " + ramadanViewYear;
+    var loc = loadLocation();
+    if(!loc || !loc.city){
+      ramadanSummaryEl.textContent = "";
+      ramadanListEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">Önce Ayarlar\'dan bir şehir seçmen gerekiyor.</p>';
+      return;
+    }
+
+    var token = ++ramadanLoadToken;
+    ramadanSummaryEl.textContent = "";
+    ramadanListEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">Yükleniyor…</p>';
+
+    loadRamadanCalendar(ramadanViewYear, loc.city, loc.country)
+      .then(function(days){
+        if(token !== ramadanLoadToken) return;
+        renderRamadanList(days);
+      })
+      .catch(function(){
+        if(token !== ramadanLoadToken) return;
+        ramadanListEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">İmsakiye yüklenemedi. İnternetini kontrol edip tekrar dene.</p>';
+      });
+  }
+
+  function openRamadanModal(){
+    setFabOpen(false);
+    ramadanModal.classList.remove("hidden");
+    if(ramadanViewYear){
+      renderRamadanForYear();
+      return;
+    }
+    ramadanYearLabelEl.textContent = "Yükleniyor…";
+    fetchTodayHijriYear()
+      .then(function(year){
+        ramadanViewYear = year;
+        renderRamadanForYear();
+      })
+      .catch(function(){
+        ramadanYearLabelEl.textContent = "Ramazan";
+        ramadanListEl.innerHTML = '<p class="text-sm text-center py-8" style="color:var(--muted)">Hicri yıl alınamadı. İnternetini kontrol edip tekrar dene.</p>';
+      });
+  }
+  function closeRamadanModal(){
+    ramadanModal.classList.add("hidden");
+  }
+
+  fabRamadanBtn.addEventListener("click", openRamadanModal);
+  ramadanClose.addEventListener("click", closeRamadanModal);
+  ramadanBackdrop.addEventListener("click", closeRamadanModal);
+  ramadanPrevYearBtn.addEventListener("click", function(){
+    if(!ramadanViewYear) return;
+    ramadanViewYear -= 1;
+    renderRamadanForYear();
+  });
+  ramadanNextYearBtn.addEventListener("click", function(){
+    if(!ramadanViewYear) return;
+    ramadanViewYear += 1;
+    renderRamadanForYear();
+  });
+  /* ---------- İlk açılış karşılama ---------- */
+  var ONBOARDING_KEY = "vakt_onboarding_seen";
+  var onboardingModal = document.getElementById("onboardingModal");
+  var onboardingSlideContentEl = document.getElementById("onboardingSlideContent");
+  var onboardingDotsEl = document.getElementById("onboardingDots");
+  var onboardingNextBtn = document.getElementById("onboardingNextBtn");
+  var onboardingSkipBtn = document.getElementById("onboardingSkip");
+  var onboardingIndex = 0;
+
+  var ICON_MOON = '<path d="M17 12.5A5.5 5.5 0 1 1 11.5 7a4.2 4.2 0 0 0 5.5 5.5Z"/><circle cx="19" cy="6" r=".6" fill="var(--gold)"/><circle cx="6" cy="9" r=".5" fill="var(--gold)"/>';
+  var ICON_DOME = '<path d="M4 19h16"/><path d="M6 19c0-5 3-8 6-8s6 3 6 8"/><path d="M12 11V6"/><circle cx="12" cy="4.5" r="1.5" fill="var(--gold)"/>';
+  var ICON_PIN = '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>';
+  var ICON_COMPASS = '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5 12 12l-2.5 2.5L12 12Z"/>';
+  var ICON_HEART = '<path d="M12 20s-7-4.35-9.5-8.5C.7 8 2 4.5 5.5 4c2-.3 3.7.9 4.5 2.3.8-1.4 2.5-2.6 4.5-2.3C18 4.5 19.3 8 17.5 11.5 15 15.65 12 20 12 20Z"/>';
+
+  var ONBOARDING_SLIDES = [
+    {
+      icon: ICON_MOON,
+      title: "Vakt'e Hoş Geldin",
+      body: "Bu sadece bir namaz takip uygulaması değil — beş vaktini birlikte yaşayacağın, seninle birlikte büyüyen bir yoldaş."
+    },
+    {
+      icon: ICON_DOME,
+      title: "Her Namazın Bu Camiyi Büyütür",
+      body: "Kıldıkça seviye atlıyorsun; kubbeler, minareler ve bir nur halesi yavaş yavaş beliriyor. Namaz burada küçük bir zafer gibi hissettirsin istedik."
+    },
+    {
+      icon: ICON_PIN,
+      title: "Sana Özel Vakitler İçin Bir Şehir Seçelim",
+      body: "Doğru vakitleri ve canlı geri sayımı görebilmen için tek yapman gereken bir şehir seçmek — bir dakika bile sürmez."
+    },
+    {
+      icon: ICON_COMPASS,
+      title: "Kur'an, Kıble, Ramazan ve Daha Fazlası",
+      body: "Üstte Takvim ve Kur'an-ı Kerim sekmeleri var. Sol alttaki + butonunda da Namaz Eğitmeni, Kıble yönü, Ramazan modu, dua ve sureler seni bekliyor."
+    },
+    {
+      icon: ICON_HEART,
+      title: "Hadi Başlayalım",
+      body: "Mutlaka affeder... Gel bir konuş istersen... Şimdi şehrini seçip ilk vaktini işaretlemeye ne dersin?",
+      isFinal: true
+    }
+  ];
+
+  function renderOnboardingSlide(){
+    var s = ONBOARDING_SLIDES[onboardingIndex];
+    onboardingSlideContentEl.innerHTML = '<div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5" style="background:var(--gold-soft)">'
+      + '<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + s.icon + '</svg>'
+      + '</div>'
+      + '<h2 class="font-serif text-xl font-semibold mb-3">' + escapeHtml(s.title) + '</h2>'
+      + '<p class="text-sm leading-relaxed" style="color:var(--muted)">' + escapeHtml(s.body) + '</p>';
+
+    onboardingDotsEl.innerHTML = ONBOARDING_SLIDES.map(function(_, i){
+      return '<span class="rounded-full transition-all" style="width:' + (i === onboardingIndex ? "18px" : "6px") + '; height:6px; background:' + (i === onboardingIndex ? "var(--gold)" : "var(--border)") + '"></span>';
+    }).join("");
+
+    onboardingNextBtn.textContent = s.isFinal ? "Şehrimi Seçmeye Başla" : "Devam Et";
+  }
+
+  function finishOnboarding(){
+    localStorage.setItem(ONBOARDING_KEY, "1");
+    onboardingModal.classList.add("hidden");
+  }
+
+  onboardingNextBtn.addEventListener("click", function(){
+    var s = ONBOARDING_SLIDES[onboardingIndex];
+    if(s.isFinal){
+      finishOnboarding();
+      openSettingsModal();
+      return;
+    }
+    onboardingIndex++;
+    renderOnboardingSlide();
+  });
+  onboardingSkipBtn.addEventListener("click", finishOnboarding);
+
+  (function maybeShowOnboarding(){
+    if(localStorage.getItem(ONBOARDING_KEY) === "1") return;
+    onboardingIndex = 0;
+    renderOnboardingSlide();
+    onboardingModal.classList.remove("hidden");
+  })();
+  /* ---------- Uygulama Turu ---------- */
+  var appTourBtn = document.getElementById("appTourBtn");
+  var appTourModal = document.getElementById("appTourModal");
+  var appTourBackdrop = document.getElementById("appTourBackdrop");
+  var appTourClose = document.getElementById("appTourClose");
+  var appTourIconEl = document.getElementById("appTourIcon");
+  var appTourTitleEl = document.getElementById("appTourTitle");
+  var appTourBodyEl = document.getElementById("appTourBody");
+  var appTourIndicatorEl = document.getElementById("appTourIndicator");
+  var appTourProgressBarEl = document.getElementById("appTourProgressBar");
+  var appTourPrevBtn = document.getElementById("appTourPrevBtn");
+  var appTourNextBtn = document.getElementById("appTourNextBtn");
+  var appTourIndex = 0;
+
+  var APP_TOUR_PAGES = [
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><path d="M22,72 A28,28 0 0 1 78,72 Z" fill="none" stroke="var(--gold)" stroke-width="3"/><line x1="50" y1="44" x2="50" y2="32" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/><circle class="tour-dot" cx="22" cy="72" r="4" fill="var(--gold)"/><circle class="tour-dot" cx="30" cy="52" r="4" fill="var(--gold)" style="animation-delay:.3s"/><circle class="tour-dot" cx="50" cy="44" r="4" fill="var(--gold)" style="animation-delay:.6s"/><circle class="tour-dot" cx="70" cy="52" r="4" fill="var(--gold)" style="animation-delay:.9s"/><circle class="tour-dot" cx="78" cy="72" r="4" fill="var(--gold)" style="animation-delay:1.2s"/></svg>',
+      title: "Bugün Sekmesi",
+      body: "Üstteki cami, o günkü ve genel gidişatını gösterir. Vakit kartlarına dokunarak namazını işaretlersin; hangi vaktin içindeysen kubbenin altında canlı bir geri sayım belirir."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><g class="tour-breathe"><path d="M25,75 A25,25 0 0 1 75,75 Z" fill="var(--gold)"/><rect x="47" y="40" width="6" height="14" rx="3" fill="var(--gold)"/></g><circle class="tour-dot" cx="80" cy="30" r="3" fill="var(--gold)"/><circle class="tour-dot" cx="18" cy="40" r="2.2" fill="var(--gold)" style="animation-delay:.5s"/></svg>',
+      title: "Seviye ve Cami Büyümesi",
+      body: "Her işaretlediğin vakit XP kazandırır, günü tam bitirmek bonus verir. Seviye yükseldikçe cami; önce minare, sonra yan kubbeler, sonra bir nur halesiyle gerçekten büyür."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><line x1="15" y1="80" x2="85" y2="80" stroke="var(--border)" stroke-width="2"/><rect class="tour-grow" x="22" y="50" width="10" height="30" rx="2" fill="var(--green)"/><rect class="tour-grow" x="38" y="40" width="10" height="40" rx="2" fill="var(--gold)" style="animation-delay:.2s"/><rect class="tour-grow" x="54" y="55" width="10" height="25" rx="2" fill="var(--green)" style="animation-delay:.4s"/><rect class="tour-grow" x="70" y="35" width="10" height="45" rx="2" fill="var(--gold)" style="animation-delay:.6s"/></svg>',
+      title: "Takvim Sekmesi",
+      body: "Son 7 veya 30 günün grafiğini, ay görünümünde hangi günü ne kadar tamamladığını ve geçmiş bir günü düzeltebileceğin bir detay ekranı bulursun."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><path d="M15,35 Q35,28 50,35 L50,75 Q35,68 15,75 Z" fill="none" stroke="var(--gold)" stroke-width="3"/><path d="M85,35 Q65,28 50,35 L50,75 Q65,68 85,75 Z" fill="none" stroke="var(--gold)" stroke-width="3"/><rect class="tour-sweep" x="46" y="30" width="3" height="45" fill="var(--glow)" opacity=".85"/></svg>',
+      title: "Kur'an-ı Kerim Sekmesi",
+      body: "604 sayfalık Mushaf'ı sayfa sayfa çevirip okuyabilirsin; her sayfada Arapça metin ve Diyanet meali birlikte. \"Sureye git\" ile istediğin sureye anında atlarsın. Bugün sekmesindeki günün ayetine dokunmak da seni doğrudan o sayfaya götürür."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><g class="tour-breathe"><circle cx="50" cy="50" r="26" fill="var(--gold)"/><path d="M50,38v24M38,50h24" stroke="var(--silhouette)" stroke-width="4" stroke-linecap="round"/></g></svg>',
+      title: "Sol Alttaki + Butonu",
+      body: "Ekranın sol altındaki altın butona dokununca beş farklı araç açılır. Şimdi onlara tek tek bakalım."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><g class="tour-bounce"><path d="M50,28 L85,44 L50,58 L15,44 Z" fill="var(--gold)"/><line x1="78" y1="47" x2="78" y2="64" stroke="var(--gold)" stroke-width="2.5"/><circle cx="78" cy="67" r="2.5" fill="var(--gold)"/></g><path d="M28,54 L28,70 Q50,80 72,70 L72,54" fill="none" stroke="var(--gold)" stroke-width="3"/></svg>',
+      title: "Namaz Eğitmeni",
+      body: "Hanefi mezhebine göre, adım adım namazın nasıl kılındığını anlatır: her rekâtta ne okunacağı, rükû, secde, oturuş ve selam. Ayrıca her vaktin rekât sayılarını da bulursun."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><path d="M50,30 C35,25 20,28 15,33 L15,72 C20,67 35,64 50,69 C65,64 80,67 85,72 L85,33 C80,28 65,25 50,30 Z" fill="none" stroke="var(--gold)" stroke-width="3"/><line x1="50" y1="30" x2="50" y2="69" stroke="var(--gold)" stroke-width="2"/><rect class="tour-sweep-v" x="20" y="40" width="20" height="3" fill="var(--glow)" opacity=".85"/></svg>',
+      title: "Dualar ve Sureler",
+      body: "Namazda okunan duaların (Sübhâneke, Ettehiyyâtü, Salli, Bârik, Rabbenâ) ve 10 örnek zamm-ı surenin Arapçasını, okunuşunu ve Türkçe mealini bulursun."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="50" cy="50" r="30" fill="none" stroke="var(--gold)" stroke-width="3"/><line class="tour-spin" x1="50" y1="50" x2="50" y2="28" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="50" x2="64" y2="50" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="50" r="3" fill="var(--gold)"/></svg>',
+      title: "Kaza Namazları",
+      body: "İşaretlemediğin geçmiş günler otomatik olarak kaza borcuna eklenir. Kazasını kıldığında \"Kıldım\" butonuna dokunman yeterli."
+    },
+    {
+      visual: '<svg viewBox="0 0 100 100" class="w-16 h-16"><circle cx="40" cy="55" r="24" fill="none" stroke="var(--gold)" stroke-width="2.5"/><g class="tour-swing"><line x1="40" y1="55" x2="40" y2="35" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/><polygon points="40,31 35,40 45,40" fill="var(--gold)"/></g><path class="tour-dot" transform="translate(78,28) scale(1.3)" d="M0,-6 A6,6 0 1 0 0,6 A4.6,4.6 0 1 1 0,-6 Z" fill="var(--gold)"/></svg>',
+      title: "Kıble Yönü ve Ramazan Modu",
+      body: "Kıble Yönü konumuna göre Kâbe'nin yönünü hesaplar, isteğe bağlı canlı pusula sunar. Ramazan Modu ise seçtiğin şehre göre istediğin yılın imsakiyesini (İmsak/İftar saatleri) gösterir."
+    }
+  ];
+
+  function renderAppTourPage(){
+    var p = APP_TOUR_PAGES[appTourIndex];
+    appTourIconEl.innerHTML = p.visual;
+    appTourTitleEl.textContent = p.title;
+    appTourBodyEl.textContent = p.body;
+    appTourIndicatorEl.textContent = (appTourIndex + 1) + " / " + APP_TOUR_PAGES.length;
+    appTourProgressBarEl.style.width = Math.round(((appTourIndex + 1) / APP_TOUR_PAGES.length) * 100) + "%";
+    appTourPrevBtn.disabled = appTourIndex === 0;
+    appTourNextBtn.disabled = appTourIndex === APP_TOUR_PAGES.length - 1;
+    appTourBodyEl.parentNode.scrollTop = 0;
+  }
+
+  function openAppTour(){
+    appTourIndex = 0;
+    renderAppTourPage();
+    appTourModal.classList.remove("hidden");
+  }
+  function closeAppTour(){
+    appTourModal.classList.add("hidden");
+  }
+
+  appTourBtn.addEventListener("click", openAppTour);
+  appTourClose.addEventListener("click", closeAppTour);
+  appTourBackdrop.addEventListener("click", closeAppTour);
+  appTourPrevBtn.addEventListener("click", function(){
+    if(appTourIndex > 0){ appTourIndex--; renderAppTourPage(); }
+  });
+  appTourNextBtn.addEventListener("click", function(){
+    if(appTourIndex < APP_TOUR_PAGES.length - 1){ appTourIndex++; renderAppTourPage(); }
+  });
+
+  var APP_TOUR_SEEN_KEY = "vakt_apptour_seen";
+  (function maybeShowAppTour(){
+    if(localStorage.getItem(APP_TOUR_SEEN_KEY) === "1") return;
+    if(localStorage.getItem(ONBOARDING_KEY) !== "1") return;
+    localStorage.setItem(APP_TOUR_SEEN_KEY, "1");
+    setTimeout(openAppTour, 700);
+  })();
 
 })();
 </script>
