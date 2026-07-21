@@ -267,6 +267,8 @@
   #calPrev, #calNext{ background: transparent; }
   #calPrev:hover, #calNext:hover{ background: var(--border); color: var(--text); }
   #quranPrevBtn:disabled, #quranNextBtn:disabled{ opacity: .35; }
+  .quran-ayah-span{ border-radius: 4px; transition: background-color .3s ease, box-shadow .3s ease; }
+  .quran-ayah-playing{ background: var(--gold-soft); box-shadow: 0 0 0 3px var(--gold-soft); }
   #teacherPrevBtn:disabled, #teacherNextBtn:disabled{ opacity: .35; }
   #appTourPrevBtn:disabled, #appTourNextBtn:disabled{ opacity: .35; }
 
@@ -708,6 +710,15 @@
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
+
+      <div class="flex justify-center mb-4 fade-in">
+        <button id="quranPlayBtn" type="button" class="focus-ring inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors" style="border-color:var(--gold); color:var(--gold); background:var(--gold-soft)">
+          <svg id="quranPlayIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="var(--gold)"><path d="M8 5v14l11-7Z"/></svg>
+          <svg id="quranPauseIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="var(--gold)"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <span id="quranPlayLabel">Sayfayı Dinle</span>
+        </button>
+      </div>
+      <audio id="quranAudioPlayer" preload="none"></audio>
 
       <div id="quranPageContent" class="fade-in"></div>
     </div>
@@ -1514,6 +1525,7 @@
     tabBtnToday.setAttribute("aria-selected", showToday ? "true" : "false");
     tabBtnCalendar.setAttribute("aria-selected", showCalendar ? "true" : "false");
     tabBtnQuran.setAttribute("aria-selected", showQuran ? "true" : "false");
+    if(!showQuran) stopQuranAudio();
     if(showCalendar){
       renderCalendarGrid();
       renderCalendarDetail();
@@ -2311,6 +2323,16 @@
   var dailyVerseArabicEl = document.getElementById("dailyVerseArabic");
   var dailyVerseTurkishEl = document.getElementById("dailyVerseTurkish");
   var dailyVerseRefEl = document.getElementById("dailyVerseRef");
+  var quranPlayBtn = document.getElementById("quranPlayBtn");
+  var quranPlayIcon = document.getElementById("quranPlayIcon");
+  var quranPauseIcon = document.getElementById("quranPauseIcon");
+  var quranPlayLabel = document.getElementById("quranPlayLabel");
+  var quranAudioPlayer = document.getElementById("quranAudioPlayer");
+
+  var QURAN_RECITER = "ar.alafasy";
+  var quranPageAyahNumbers = [];
+  var quranAudioIndex = -1;
+  var quranIsPlaying = false;
 
   var surahList = null;
   var quranInitialized = false;
@@ -2450,6 +2472,7 @@
           var sn = a.surah ? a.surah.number : null;
           return {
             n: a.numberInSurah,
+            num: a.number,
             ar: a.text,
             tr: (sn != null && trMap[sn + ":" + a.numberInSurah]) || "",
             surahName: a.surah ? (a.surah.englishName + (a.surah.englishNameTranslation ? " · " + a.surah.englishNameTranslation : "")) : ("Sayfa " + pageNum)
@@ -2468,6 +2491,7 @@
     var lastSurah = null;
     var arabicBuffer = "";
     var turkishItems = [];
+    quranPageAyahNumbers = [];
 
     function flushSection(){
       if(!arabicBuffer) return;
@@ -2487,17 +2511,20 @@
         html += '<p class="text-center font-serif text-sm font-semibold mb-3 mt-1" style="color:var(--gold)">' + escapeHtml(a.surahName) + '</p>';
         lastSurah = a.surahName;
       }
-      arabicBuffer += escapeHtml(a.ar) + ' <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] align-middle" style="border:1px solid var(--gold); color:var(--gold)">' + a.n + '</span> ';
+      arabicBuffer += '<span class="quran-ayah-span" data-num="' + a.num + '">' + escapeHtml(a.ar) + ' <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] align-middle" style="border:1px solid var(--gold); color:var(--gold)">' + a.n + '</span></span> ';
       turkishItems.push('<p class="text-sm leading-relaxed"><span class="font-semibold" style="color:var(--gold)">' + a.n + '.</span> <span style="color:var(--muted)">' + escapeHtml(a.tr) + '</span></p>');
+      quranPageAyahNumbers.push(a.num);
     });
     flushSection();
 
     quranPageContentEl.innerHTML = html || '<p class="text-sm text-center py-10" style="color:var(--muted)">İçerik bulunamadı.</p>';
+    updateQuranPlayButton();
   }
 
   function renderPage(pageNum){
     pageNum = Math.max(1, Math.min(QURAN_TOTAL_PAGES, pageNum));
     currentPage = pageNum;
+    stopQuranAudio();
     localStorage.setItem(QURAN_LAST_PAGE_KEY, String(pageNum));
     quranPageLabelEl.textContent = "Sayfa " + pageNum + " / " + QURAN_TOTAL_PAGES;
     quranPrevBtn.disabled = pageNum <= 1;
@@ -2517,6 +2544,74 @@
 
   quranPrevBtn.addEventListener("click", function(){ renderPage(currentPage - 1); });
   quranNextBtn.addEventListener("click", function(){ renderPage(currentPage + 1); });
+
+  /* ---------- Kur'an sesli dinleme ---------- */
+  function buildAyahAudioUrl(ayahNumber){
+    return "https://cdn.islamic.network/quran/audio/128/" + QURAN_RECITER + "/" + ayahNumber + ".mp3";
+  }
+
+  function clearAyahHighlight(){
+    var prev = quranPageContentEl.querySelector(".quran-ayah-playing");
+    if(prev) prev.classList.remove("quran-ayah-playing");
+  }
+
+  function highlightAyah(ayahNumber){
+    clearAyahHighlight();
+    var el = quranPageContentEl.querySelector('.quran-ayah-span[data-num="' + ayahNumber + '"]');
+    if(el){
+      el.classList.add("quran-ayah-playing");
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function updateQuranPlayButton(){
+    quranPlayIcon.classList.toggle("hidden", quranIsPlaying);
+    quranPauseIcon.classList.toggle("hidden", !quranIsPlaying);
+    quranPlayLabel.textContent = quranIsPlaying ? "Duraklat" : "Sayfayı Dinle";
+    quranPlayBtn.disabled = !quranPageAyahNumbers.length;
+    quranPlayBtn.style.opacity = quranPageAyahNumbers.length ? "1" : ".5";
+  }
+
+  function playQuranFromIndex(idx){
+    if(idx < 0 || idx >= quranPageAyahNumbers.length){
+      stopQuranAudio();
+      return;
+    }
+    quranAudioIndex = idx;
+    var ayahNumber = quranPageAyahNumbers[idx];
+    quranAudioPlayer.src = buildAyahAudioUrl(ayahNumber);
+    quranAudioPlayer.play().catch(function(){ /* otomatik oynatma engellenmiş olabilir, sessizce yok say */ });
+    quranIsPlaying = true;
+    highlightAyah(ayahNumber);
+    updateQuranPlayButton();
+  }
+
+  function stopQuranAudio(){
+    quranIsPlaying = false;
+    quranAudioIndex = -1;
+    quranAudioPlayer.pause();
+    quranAudioPlayer.removeAttribute("src");
+    clearAyahHighlight();
+    updateQuranPlayButton();
+  }
+
+  quranAudioPlayer.addEventListener("ended", function(){
+    if(quranAudioIndex >= 0) playQuranFromIndex(quranAudioIndex + 1);
+  });
+
+  quranPlayBtn.addEventListener("click", function(){
+    if(quranIsPlaying){
+      quranIsPlaying = false;
+      quranAudioPlayer.pause();
+      updateQuranPlayButton();
+    } else if(quranAudioIndex >= 0 && quranAudioIndex < quranPageAyahNumbers.length){
+      quranIsPlaying = true;
+      quranAudioPlayer.play().catch(function(){});
+      updateQuranPlayButton();
+    } else {
+      playQuranFromIndex(0);
+    }
+  });
 
   /* ---------- Günün Ayeti ---------- */
   function dailyAyahNumberFor(dateStr){
