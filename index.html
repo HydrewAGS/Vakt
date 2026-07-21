@@ -3014,7 +3014,11 @@
     { no: 10, key: "fil", surahNo: 105, tr_name: "Fîl Sûresi", note: "Zamm-ı sure örneği.",
       translit: ["Elem tera keyfe feale rabbüke biashâbil-fîl.", "Elem yec'al keydehüm fî tadlîl.", "Ve ersele aleyhim tayran ebâbîl.", "Termîhim bihicâratim-min siccîl.", "Fecealehüm keasfim-me'kûl."] },
     { no: 11, key: "asr", surahNo: 103, tr_name: "Asr Sûresi", note: "Zamm-ı sure örneği.",
-      translit: ["Vel-asr.", "İnnel-insâne lefî husr.", "İllellezîne âmenû ve amilüs-sâlihâti ve tevâsav bil-hakkı ve tevâsav bis-sabr."] }
+      translit: ["Vel-asr.", "İnnel-insâne lefî husr.", "İllellezîne âmenû ve amilüs-sâlihâti ve tevâsav bil-hakkı ve tevâsav bis-sabr."] },
+    { no: 12, key: "insirah", surahNo: 94, tr_name: "İnşirâh Sûresi", note: "Zamm-ı sure örneği.",
+      translit: ["Elem neşrah leke sadrek.", "Ve vada'nâ anke vizrek.", "Ellezî enkada zahrak.", "Ve refa'nâ leke zikrek.", "Feinne me'al-usri yüsrâ.", "İnne me'al-usri yüsrâ.", "Feizâ ferağte fensab.", "Ve ilâ rabbike ferğab."] },
+    { no: 13, key: "nazar", surahNo: 68, ayahRange: [51, 52], tr_name: "Nazar Duası (Kalem 51-52)", note: "Nazardan korunmak için okunan, Kalem Sûresi'nin son iki ayeti.",
+      translit: ["Ve in yekâdüllezîne keferû leyuzlikûneke bi ebsârihim lemmâ semi'uz-zikra ve yekûlûne innehû lemecnûn.", "Ve mâ hüve illâ zikrun lil-âlemîn."] }
   ];
 
   function loadDuasArabicCache(){
@@ -3092,11 +3096,19 @@
   function renderSurahDetail(s, content){
     duasDetailTitleEl.textContent = s.tr_name;
 
-    var ayahs = content && content.ar;
-    var mealAyahs = content && content.meal;
+    var allAyahs = (content && content.ar) || [];
+    var allMealAyahs = (content && content.meal) || [];
+    var startIdx = 0, endIdx = allAyahs.length;
+    if(s.ayahRange){
+      startIdx = s.ayahRange[0] - 1;
+      endIdx = s.ayahRange[1];
+    }
+    var ayahs = allAyahs.slice(startIdx, endIdx);
+    var mealAyahs = allMealAyahs.slice(startIdx, endIdx);
+    var firstAyahNum = startIdx + 1;
 
     var arabicHtml;
-    if(ayahs && ayahs.length){
+    if(ayahs.length){
       arabicHtml = '<p dir="rtl" lang="ar" class="font-display text-xl leading-loose mb-4" style="color:var(--text)">'
         + ayahs.map(function(a){ return escapeHtml(a.text); }).join(" ") + '</p>';
     } else {
@@ -3104,13 +3116,13 @@
     }
 
     var translitHtml = s.translit.map(function(line, i){
-      return '<p class="text-sm leading-relaxed mb-1"><span class="font-semibold" style="color:var(--gold)">' + (i + 1) + '.</span> ' + escapeHtml(line) + '</p>';
+      return '<p class="text-sm leading-relaxed mb-1"><span class="font-semibold" style="color:var(--gold)">' + (firstAyahNum + i) + '.</span> ' + escapeHtml(line) + '</p>';
     }).join("");
 
     var mealHtml;
-    if(mealAyahs && mealAyahs.length){
+    if(mealAyahs.length){
       mealHtml = mealAyahs.map(function(a, i){
-        return '<p class="text-sm leading-relaxed mb-1"><span class="font-semibold" style="color:var(--gold)">' + (i + 1) + '.</span> <span style="color:var(--muted)">' + escapeHtml(a.text) + '</span></p>';
+        return '<p class="text-sm leading-relaxed mb-1"><span class="font-semibold" style="color:var(--gold)">' + (firstAyahNum + i) + '.</span> <span style="color:var(--muted)">' + escapeHtml(a.text) + '</span></p>';
       }).join("");
     } else {
       mealHtml = '<p class="text-sm" style="color:var(--muted)">Türkçe meal şu an yüklenemedi.</p>';
