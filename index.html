@@ -718,7 +718,7 @@
           <span id="quranPlayLabel">Sayfayı Dinle</span>
         </button>
       </div>
-      <audio id="quranAudioPlayer" preload="none"></audio>
+      <audio id="quranAudioPlayer" preload="auto"></audio>
 
       <div id="quranPageContent" class="fade-in"></div>
     </div>
@@ -2304,7 +2304,7 @@
   var QURAN_AR_EDITION = "quran-uthmani";
   var QURAN_TR_EDITION = "tr.diyanet";
   var QURAN_SURAHS_KEY = "vakt_quran_surahs";
-  var QURAN_PAGE_PREFIX = "vakt_quran_page_";
+  var QURAN_PAGE_PREFIX = "vakt_quran_page_v2_";
   var QURAN_SURAH_TR_PREFIX = "vakt_quran_surah_tr_";
   var QURAN_DAILY_KEY = "vakt_quran_daily";
   var QURAN_LAST_PAGE_KEY = "vakt_quran_last_page";
@@ -2448,7 +2448,7 @@
     var key = QURAN_PAGE_PREFIX + pageNum;
     try{
       var cached = JSON.parse(localStorage.getItem(key));
-      if(cached && cached.ayahs && cached.ayahs.length) return Promise.resolve(cached);
+      if(cached && cached.ayahs && cached.ayahs.length && cached.ayahs[0].num) return Promise.resolve(cached);
     }catch(e){ /* yok say */ }
 
     var base = "https://api.alquran.cloud/v1/page/" + pageNum;
@@ -2546,8 +2546,12 @@
   quranNextBtn.addEventListener("click", function(){ renderPage(currentPage + 1); });
 
   /* ---------- Kur'an sesli dinleme ---------- */
-  function buildAyahAudioUrl(ayahNumber){
-    return "https://cdn.islamic.network/quran/audio/128/" + QURAN_RECITER + "/" + ayahNumber + ".mp3";
+  var QURAN_AUDIO_BITRATES = [128, 64, 32];
+  var quranAudioBitrateIdx = 0;
+
+  function buildAyahAudioUrl(ayahNumber, bitrateIdx){
+    var bitrate = QURAN_AUDIO_BITRATES[bitrateIdx] || QURAN_AUDIO_BITRATES[0];
+    return "https://cdn.islamic.network/quran/audio/" + bitrate + "/" + QURAN_RECITER + "/" + ayahNumber + ".mp3";
   }
 
   function clearAyahHighlight(){
@@ -2568,27 +2572,61 @@
     quranPlayIcon.classList.toggle("hidden", quranIsPlaying);
     quranPauseIcon.classList.toggle("hidden", !quranIsPlaying);
     quranPlayLabel.textContent = quranIsPlaying ? "Duraklat" : "Sayfayı Dinle";
-    quranPlayBtn.disabled = !quranPageAyahNumbers.length;
-    quranPlayBtn.style.opacity = quranPageAyahNumbers.length ? "1" : ".5";
+    var hasAyahs = !!quranPageAyahNumbers.length;
+    quranPlayBtn.disabled = !hasAyahs;
+    quranPlayBtn.style.opacity = hasAyahs ? "1" : ".5";
   }
 
   function playQuranFromIndex(idx){
+    if(!quranPageAyahNumbers.length){
+      showToast("Sayfa henüz yüklenmedi, birazdan tekrar dene");
+      return;
+    }
     if(idx < 0 || idx >= quranPageAyahNumbers.length){
       stopQuranAudio();
       return;
     }
     quranAudioIndex = idx;
+    quranAudioBitrateIdx = 0;
     var ayahNumber = quranPageAyahNumbers[idx];
-    quranAudioPlayer.src = buildAyahAudioUrl(ayahNumber);
-    quranAudioPlayer.play().catch(function(){ /* otomatik oynatma engellenmiş olabilir, sessizce yok say */ });
+    if(!ayahNumber){
+      showToast("Bu ayet için ses bulunamadı, sayfayı tazeleyip tekrar dene");
+      stopQuranAudio();
+      return;
+    }
     quranIsPlaying = true;
     highlightAyah(ayahNumber);
     updateQuranPlayButton();
+    loadAndPlayAyah(ayahNumber);
+  }
+
+  function loadAndPlayAyah(ayahNumber){
+    quranAudioPlayer.pause();
+    quranAudioPlayer.src = buildAyahAudioUrl(ayahNumber, quranAudioBitrateIdx);
+    quranAudioPlayer.load();
+    var playPromise = quranAudioPlayer.play();
+    if(!playPromise || typeof playPromise.catch !== "function") return;
+    playPromise.catch(function(err){
+      if(quranAudioBitrateIdx < QURAN_AUDIO_BITRATES.length - 1){
+        quranAudioBitrateIdx++;
+        loadAndPlayAyah(ayahNumber);
+        return;
+      }
+      quranIsPlaying = false;
+      updateQuranPlayButton();
+      var reason = (err && (err.name || err.message)) || "bilinmeyen hata";
+      if(err && err.name === "NotAllowedError"){
+        showToast("Tarayıcı sesi engelledi, Dinle butonuna tekrar dokun");
+      } else {
+        showToast("Ses çalınamadı (" + reason + "). Tekrar dene.");
+      }
+    });
   }
 
   function stopQuranAudio(){
     quranIsPlaying = false;
     quranAudioIndex = -1;
+    quranAudioBitrateIdx = 0;
     quranAudioPlayer.pause();
     quranAudioPlayer.removeAttribute("src");
     clearAyahHighlight();
@@ -2599,6 +2637,21 @@
     if(quranAudioIndex >= 0) playQuranFromIndex(quranAudioIndex + 1);
   });
 
+  quranAudioPlayer.addEventListener("error", function(e){
+    if(!quranIsPlaying || quranAudioIndex < 0) return;
+    var ayahNumber = quranPageAyahNumbers[quranAudioIndex];
+    if(!ayahNumber) return;
+    if(quranAudioBitrateIdx < QURAN_AUDIO_BITRATES.length - 1){
+      quranAudioBitrateIdx++;
+      loadAndPlayAyah(ayahNumber);
+    } else {
+      quranIsPlaying = false;
+      updateQuranPlayButton();
+      var code = (quranAudioPlayer.error && quranAudioPlayer.error.code) || "?";
+      showToast("Ses dosyası yüklenemedi (hata kodu " + code + "). Tekrar dene.");
+    }
+  });
+
   quranPlayBtn.addEventListener("click", function(){
     if(quranIsPlaying){
       quranIsPlaying = false;
@@ -2606,8 +2659,12 @@
       updateQuranPlayButton();
     } else if(quranAudioIndex >= 0 && quranAudioIndex < quranPageAyahNumbers.length){
       quranIsPlaying = true;
-      quranAudioPlayer.play().catch(function(){});
       updateQuranPlayButton();
+      quranAudioPlayer.play().catch(function(){
+        quranIsPlaying = false;
+        updateQuranPlayButton();
+        showToast("Ses çalınamadı, tekrar dene");
+      });
     } else {
       playQuranFromIndex(0);
     }
